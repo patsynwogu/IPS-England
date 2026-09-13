@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPS-England — the identification pathway, simulated</title>
+<style>
+:root{
+  --paper:#f7f5f2; --ink:#16191d; --ink-soft:#565d66; --rule:#ddd8d1;
+  --panel:#14181d; --panel-soft:#1e242c; --panel-ink:#e8eaed; --panel-ink-soft:#97a1ad;
+  --s0:#8892a0;  /* unrecognised: outline only */
+  --s1:#6b7d8f;  /* SEN support */
+  --s2:#4a6b8a;  /* requested */
+  --s3:#c4703d;  /* waiting  (the alert state) */
+  --s4:#2d4a63;  /* plan issued (settled, not triumphant) */
+  --real:#b33c3c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.65 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:0 24px 120px}
+.wide{max-width:960px;margin:0 auto;padding:0 24px}
+
+header{padding:88px 0 40px;border-bottom:1px solid var(--rule);margin-bottom:56px}
+h1{font-size:2.5rem;line-height:1.15;margin:0 0 14px;letter-spacing:-.02em;font-weight:600}
+.standfirst{font-size:1.15rem;color:var(--ink-soft);margin:0 0 24px}
+.meta{font:500 .78rem/1.5 ui-sans-serif,system-ui,sans-serif;color:var(--ink-soft);
+  letter-spacing:.06em;text-transform:uppercase}
+
+section{margin:0 0 72px}
+.kicker{font:600 .72rem/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:12px}
+h2{font-size:1.6rem;line-height:1.25;margin:0 0 18px;font-weight:600;letter-spacing:-.01em}
+p{margin:0 0 18px}
+.lede{font-size:1.08rem}
+strong{font-weight:600}
+
+/* dark instrument panels */
+.fig{background:var(--panel);border-radius:6px;margin:32px 0;padding:28px 28px 22px;
+  color:var(--panel-ink)}
+.fig-label{font:600 .7rem/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--panel-ink-soft);margin-bottom:20px}
+.fig-cap{font:.82rem/1.5 ui-sans-serif,system-ui,sans-serif;color:var(--panel-ink-soft);
+  margin-top:18px;padding-top:14px;border-top:1px solid #2a323c}
+
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;
+  font:.75rem/1 ui-sans-serif,system-ui,sans-serif;color:var(--panel-ink-soft)}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:2px;display:inline-block}
+
+.controls{display:flex;align-items:center;gap:18px;margin:22px 0 6px;flex-wrap:wrap}
+input[type=range]{flex:1;min-width:220px;accent-color:#5b8db8;height:4px}
+button{font:500 .82rem ui-sans-serif,system-ui,sans-serif;background:var(--panel-soft);
+  color:var(--panel-ink);border:1px solid #333c47;border-radius:4px;padding:7px 14px;cursor:pointer}
+button:hover{background:#28313b}
+
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:#2a323c;border-radius:4px;overflow:hidden;margin-top:20px}
+.rd{background:var(--panel);padding:14px 16px}
+.rd .v{font:600 1.5rem/1.1 ui-sans-serif,system-ui,sans-serif;letter-spacing:-.02em}
+.rd .l{font:.72rem/1.4 ui-sans-serif,system-ui,sans-serif;color:var(--panel-ink-soft);margin-top:5px}
+.rd.miss .v{color:var(--s3)}
+.rd.real .v{color:#e06b6b}
+
+.claim{border-left:3px solid var(--ink);padding:4px 0 4px 22px;margin:30px 0;
+  font-size:1.12rem;line-height:1.55}
+.note{background:#efece7;border-radius:5px;padding:18px 22px;margin:26px 0;
+  font-size:.92rem;color:var(--ink-soft)}
+.note b{color:var(--ink)}
+.pending{border:1px dashed var(--rule);border-radius:5px;padding:26px;text-align:center;
+  color:var(--ink-soft);font:.88rem ui-sans-serif,system-ui,sans-serif;margin:30px 0}
+
+table{width:100%;border-collapse:collapse;margin:22px 0;
+  font:.85rem ui-sans-serif,system-ui,sans-serif}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule)}
+th{font-weight:600;color:var(--ink-soft);font-size:.76rem;text-transform:uppercase;letter-spacing:.07em}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+
+footer{border-top:1px solid var(--rule);padding-top:26px;margin-top:80px;
+  font:.82rem/1.7 ui-sans-serif,system-ui,sans-serif;color:var(--ink-soft)}
+a{color:#2d5a80}
+@media(max-width:600px){h1{font-size:1.9rem}.fig{padding:20px 16px 16px}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <!-- one child figure, reused at every scale; no face, because the model knows nothing individuating -->
+  <g id="kid">
+    <circle cx="0" cy="-7.2" r="3.1"/>
+    <path d="M-3.3,-3.4 h6.6 a1.5,1.5 0 0 1 1.5,1.5 v5.2 a1.1,1.1 0 0 1 -2.2,0 v-1.2 h-0.5 v6.6
+             a1.3,1.3 0 0 1 -2.6,0 v-4.1 h-0.7 v4.1 a1.3,1.3 0 0 1 -2.6,0 v-6.6 h-0.5 v1.2
+             a1.1,1.1 0 0 1 -2.2,0 v-5.2 a1.5,1.5 0 0 1 1.5,-1.5 z"/>
+  </g>
+</defs></svg>
+
+<div class="wrap">
+<header>
+  <div class="meta">IPS-England &middot; v1.0 &middot; September 2026</div>
+  <h1>England issues more plans than its assessment capacity can explain, and misses more deadlines than it can explain either.</h1>
+  <p class="standfirst">A simulation of the special educational needs identification pathway, built to test the
+  assumption that delay is a resourcing problem. It could not reproduce England from that assumption at any
+  level of resourcing.</p>
+  <div class="meta">Patsy Nwogu &middot; Computational Governance</div>
+</header>
+
+<section>
+  <div class="kicker">Why simulate</div>
+  <h2>Because nobody records what we would need to survey</h2>
+  <p class="lede">England counts children who pass through the gates of the special educational needs system.
+  It does not count the children who never reached a gate, it does not record what provision a child actually
+  received once a plan was written, and it does not record what happened to them afterwards.</p>
+  <p>You cannot survey what nobody writes down. What you can do is build the system as a working mechanism,
+  give it the rules the statute actually specifies, run it, and see whether it produces the England we observe.
+  If it does not, the assumptions inside it are wrong, and that is worth knowing.</p>
+  <p>This one did not. That is the finding.</p>
+</section>
+
+<section>
+  <div class="kicker">Part one</div>
+  <h2>The pathway</h2>
+  <p>A child with an unmet need has to travel through five stages before the state formally recognises them.
+  Need exists. Someone notices. A request is made. An assessment is carried out. A plan is issued.</p>
+  <p>Every stage can fail, and the failures are different in kind. A child can go unnoticed. A request can be
+  refused. An assessment can run past its deadline. A plan can be written and still not change what happens
+  in the classroom on Monday.</p>
+
+  <div class="fig">
+    <div class="fig-label">Figure 1 &middot; the five stages</div>
+    <svg id="pathway" viewBox="0 0 620 205" style="width:100%;height:auto"></svg>
+    <div class="legend">
+      <span><i class="sw" style="background:transparent;border:1.5px solid var(--s0)"></i>unrecognised</span>
+      <span><i class="sw" style="background:var(--s1)"></i>SEN support</span>
+      <span><i class="sw" style="background:var(--s2)"></i>assessment requested</span>
+      <span><i class="sw" style="background:var(--s3)"></i>waiting</span>
+      <span><i class="sw" style="background:var(--s4)"></i>plan issued</span>
+    </div>
+    <div class="fig-cap">One figure, one child. Colour carries the stage, never the child. Children shown as an
+    outline only are present in the population and absent from every statistic, because no part of the system
+    has recorded them.</div>
+  </div>
+</section>
+
+<section>
+  <div class="kicker">Part two</div>
+  <h2>England as it is</h2>
+  <div class="pending">Local authority map &middot; pending the 152-authority DfE breakdown</div>
+</section>
+
+<section>
+  <div class="kicker">Part three</div>
+  <h2>The assumption everyone makes</h2>
+  <p class="lede">Ask why assessments run late and you will be told, by councils, by campaigners, by the
+  Department and by most of the research literature, that there are not enough people to do them. Demand rose
+  faster than capacity. The queue grew. Children wait.</p>
+  <p>It is a completely reasonable account. It is also the account this model was built to represent, because
+  the way to test an explanation is to build it properly and see what it produces.</p>
+  <p>So: requests arrive. Each one needs a caseworker. The statutory process has a floor on how long it takes
+  regardless of staffing, roughly fourteen weeks of sequential steps set in regulation, the six-week decision
+  window, the six-week professional advice period, then drafting and consultation. Add queueing on top of that
+  floor and you have the standard explanation, running.</p>
+
+  <div class="note">
+    <b>England, in the year to January 2026.</b> 162,702 requests for an assessment. 110,708 new plans issued.
+    46.1% of them within the twenty-week statutory deadline. Those three numbers are what the model has to
+    reproduce simultaneously. <span style="font-size:.86rem">(DfE, <i>Education, health and care plans</i>,
+    January 2026.)</span>
+  </div>
+</section>
+
+<section>
+  <div class="kicker">Part four</div>
+  <h2>Now try to reproduce England</h2>
+  <p class="lede">Below is the model, running across all 152 local authorities. The slider sets assessment
+  capacity relative to demand. Everything else is held at the statutory values.</p>
+  <p>Your task is simple. Find a setting that issues about 110,708 plans a year <em>and</em> gets about 46%
+  of them out within twenty weeks. Both at once, which is what England does.</p>
+</section>
+</div>
+
+<div class="wide">
+  <div class="fig">
+    <div class="fig-label">Figure 2 &middot; capacity sweep across 152 authorities</div>
+    <div class="controls">
+      <label style="font:.8rem ui-sans-serif,system-ui,sans-serif;color:var(--panel-ink-soft)">capacity</label>
+      <input type="range" id="cap" min="0" max="45" value="10" step="1">
+      <button id="auto">sweep it for me</button>
+    </div>
+    <svg id="chart" viewBox="0 0 900 420" style="width:100%;height:auto"></svg>
+    <div class="readout">
+      <div class="rd"><div class="v" id="r-ratio">—</div><div class="l">capacity, relative to demand</div></div>
+      <div class="rd"><div class="v" id="r-issued">—</div><div class="l">plans issued per year</div></div>
+      <div class="rd"><div class="v" id="r-timely">—</div><div class="l">issued within 20 weeks</div></div>
+      <div class="rd miss"><div class="v" id="r-gap">—</div><div class="l">distance from England</div></div>
+    </div>
+    <div class="fig-cap">Each point is one run of the full model over six years, 152 authorities with
+    heterogeneous capacity and caseload. The red cross is England's actual position. The curve is everything
+    the model can reach. They do not meet, and no slider position brings them together.</div>
+  </div>
+</div>
+
+<div class="wrap">
+<section>
+  <h2>What just happened</h2>
+  <p>The model traces a curve through that space, and England is not on it. Push capacity up until the volume
+  is right and timeliness climbs to around 86%, nearly forty points better than England manages. Pull capacity
+  down until timeliness is right, around 47%, and the model issues roughly 88,700 plans a year, about 20% fewer
+  than England actually issued.</p>
+  <p>The two targets pull in opposite directions and the gap does not close. That is not a calibration failure
+  that a better-tuned parameter would fix. It is a property of the explanation itself: a system whose delay
+  comes from a shortage of caseworkers cannot also be a system that issues plans at England's rate.</p>
+
+  <div class="claim">If no level of resourcing reproduces what England does, then resourcing is not what is
+  producing England's delay.</div>
+
+  <p>What is left is the shape of the process rather than the number of people inside it. The statutory
+  sequence has a floor built into it that does not move when you hire. Six weeks to decide whether to assess.
+  Six weeks in which professionals must be given to respond. Then drafting, then consultation, then issue.
+  Those steps run one after another because the regulations say they do, and adding caseworkers runs more
+  cases through the same fixed-length pipe rather than shortening the pipe.</p>
+</section>
+
+<section>
+  <div class="kicker">Part six</div>
+  <h2>The hypothesis</h2>
+  <div class="claim">Assessment delay in England is generated by the mandated sequence of the statutory
+  process rather than by assessment capacity. Increases in caseworker numbers raise throughput without
+  materially reducing time to plan.</div>
+  <p>This is a claim, not a conclusion, and it is stated so that someone can kill it. The test does not need
+  this model and does not need me. Find local authorities that materially increased assessment staffing, and
+  check what happened to their twenty-week performance against their throughput. The hypothesis predicts
+  throughput rose and timeliness did not follow. If timeliness tracked staffing, the hypothesis is wrong.</p>
+  <p>It matters because the entire reform conversation, including the implementation timetable now running to
+  2030, is built on the assumption the model just failed to reproduce. If delay is structural rather than
+  financial, then more money buys more plans and roughly the same waiting, and only redesigning the sequence
+  buys less waiting.</p>
+  <p>One extension worth naming rather than building. Appeals against refusal to assess succeed overwhelmingly
+  in favour of families. A refusal that is almost always overturned is not screening anything. It is imposing
+  delay, and it imposes that delay only on the families with the capacity to appeal, while removing entirely
+  the families without it. Formalising that as a screening game that fails as screening is the obvious next
+  step, and it is not attempted here.</p>
+</section>
+
+<section>
+  <div class="kicker">Part seven</div>
+  <h2>How the model was checked, and what it got wrong on the way</h2>
+  <p>A model that only ever confirms the thing it was built to show is not a research instrument. The test
+  used here is a scale audit: run the same configuration at several agent resolutions and compare the results.
+  Anything that moves when resolution changes is describing the code, not England.</p>
+  <p>It caught two results in earlier versions, both of which were reported and then withdrawn.</p>
+  <table>
+    <tr><th>Result</th><th>Why it was withdrawn</th></tr>
+    <tr><td>Timeliness of 53.5% against a published 60%</td>
+        <td>A discretisation artefact. Across scale factors of 400, 200, 100 and 50 the figure converged to
+        97%. Coarse resolution chopped authority capacity into whole cases and made issuance arrive in lumps,
+        which inflated waiting times.</td></tr>
+    <tr><td>Children in high-issuing authorities 2.0&times; more likely to hold a plan</td>
+        <td>Monte Carlo noise. At roughly 39 agents per authority the statistic is mostly sampling variation;
+        at 158 agents per authority the ratio fell to 1.44.</td></tr>
+  </table>
+  <p>The same class of error reappeared during this rebuild, in a different place, and was caught the same
+  way. Per-authority monthly capacity was being floored to a whole number each month instead of carrying its
+  remainder forward, which stalled queues that should have moved. Fixed before any result was taken from it.</p>
+  <div class="note">
+    <b>What this version does not know.</b> The recognition stage is calibrated to the national trend but its
+    absolute level is an assumption rather than a measurement. Authority-level population and capacity
+    dispersion are modelled distributions pending the DfE per-authority release. Figures drawn from the schools
+    census (538,547 pupils with plans) and from the EHC plans release (718,838 plans, all ages, all settings)
+    describe different populations and are not interchangeable.
+  </div>
+</section>
+
+<footer>
+  <p><strong>IPS-England v1.0.</strong> Agent-based model of the SEND identification pathway, 152 local
+  authorities, six-year horizon. Sources: DfE <i>Education, health and care plans</i> (January 2026) and
+  <i>Special educational needs in England</i> (2025/26). Simulation results computed in Python; this page
+  displays those numbers and does not recompute them.</p>
+  <p>Patsy Nwogu &middot; ORCID 0009-0005-2524-4559</p>
+</footer>
+</div>
+
+<script>
+const SWEEP = {"actual":{"issued":110708,"timely":0.461,"requests":162702},"sweep":[{"ratio":0.7,"issued":72411,"timely":0.2112,"backlog":231959},{"ratio":0.72,"issued":73627,"timely":0.2527,"backlog":221413},{"ratio":0.74,"issued":75504,"timely":0.2604,"backlog":212757},{"ratio":0.76,"issued":77008,"timely":0.276,"backlog":204838},{"ratio":0.78,"issued":78097,"timely":0.305,"backlog":194339},{"ratio":0.8,"issued":79821,"timely":0.3233,"backlog":185073},{"ratio":0.82,"issued":81404,"timely":0.3417,"backlog":178114},{"ratio":0.84,"issued":82870,"timely":0.35,"backlog":170211},{"ratio":0.86,"issued":83916,"timely":0.3653,"backlog":161498},{"ratio":0.88,"issued":84506,"timely":0.3521,"backlog":156276},{"ratio":0.9,"issued":85710,"timely":0.4028,"backlog":147604},{"ratio":0.92,"issued":87369,"timely":0.4192,"backlog":141416},{"ratio":0.94,"issued":88690,"timely":0.4707,"backlog":134142},{"ratio":0.96,"issued":89662,"timely":0.4886,"backlog":126396},{"ratio":0.98,"issued":90898,"timely":0.4993,"backlog":120570},{"ratio":1.0,"issued":91745,"timely":0.5315,"backlog":115892},{"ratio":1.02,"issued":92495,"timely":0.5256,"backlog":109994},{"ratio":1.04,"issued":93105,"timely":0.5414,"backlog":105469},{"ratio":1.06,"issued":94288,"timely":0.5438,"backlog":100478},{"ratio":1.08,"issued":95143,"timely":0.5562,"backlog":96405},{"ratio":1.1,"issued":95246,"timely":0.5744,"backlog":90474},{"ratio":1.12,"issued":96703,"timely":0.5676,"backlog":86369},{"ratio":1.14,"issued":96924,"timely":0.5906,"backlog":81912},{"ratio":1.16,"issued":98053,"timely":0.6267,"backlog":78317},{"ratio":1.18,"issued":98549,"timely":0.6223,"backlog":74377},{"ratio":1.2,"issued":99561,"timely":0.6239,"backlog":69884},{"ratio":1.22,"issued":99767,"timely":0.6424,"backlog":66212},{"ratio":1.24,"issued":100305,"timely":0.665,"backlog":63675},{"ratio":1.26,"issued":100769,"timely":0.6763,"backlog":60428},{"ratio":1.28,"issued":101221,"timely":0.6624,"backlog":56884},{"ratio":1.3,"issued":101972,"timely":0.6831,"backlog":52672},{"ratio":1.32,"issued":102157,"timely":0.6873,"backlog":49912},{"ratio":1.34,"issued":102875,"timely":0.7236,"backlog":45892},{"ratio":1.36,"issued":103230,"timely":0.7044,"backlog":45116},{"ratio":1.38,"issued":103617,"timely":0.7315,"backlog":42129},{"ratio":1.4,"issued":104169,"timely":0.7339,"backlog":40091},{"ratio":1.42,"issued":104641,"timely":0.758,"backlog":37689},{"ratio":1.44,"issued":104974,"timely":0.7437,"backlog":35754},{"ratio":1.46,"issued":105461,"timely":0.7486,"backlog":32589},{"ratio":1.48,"issued":106160,"timely":0.7899,"backlog":30687},{"ratio":1.5,"issued":106263,"timely":0.8211,"backlog":29801},{"ratio":1.52,"issued":106489,"timely":0.8392,"backlog":27292},{"ratio":1.54,"issued":106762,"timely":0.8237,"backlog":25889},{"ratio":1.56,"issued":106900,"timely":0.8467,"backlog":24178},{"ratio":1.58,"issued":107136,"timely":0.8405,"backlog":22471},{"ratio":1.6,"issued":107621,"timely":0.8559,"backlog":21726},{"ratio":1.62,"issued":107532,"timely":0.8534,"backlog":20811}]};
+const REAL = SWEEP.actual;
+const rows = SWEEP.sweep;
+const C = {s0:'#8892a0',s1:'#6b7d8f',s2:'#4a6b8a',s3:'#c4703d',s4:'#2d4a63',real:'#b33c3c'};
+
+/* ---------- Figure 1: the pathway ---------- */
+(function(){
+  const svg = document.getElementById('pathway');
+  const stages = [
+    {x: 60, label:'need exists',   fill:'none',  stroke:C.s0},
+    {x:190, label:'noticed',       fill:C.s1,    stroke:null},
+    {x:320, label:'requested',     fill:C.s2,    stroke:null},
+    {x:450, label:'waiting',       fill:C.s3,    stroke:null},
+    {x:580, label:'plan issued',   fill:C.s4,    stroke:null}
+  ];
+  let h = '';
+  stages.forEach((s,i)=>{
+    if(i<stages.length-1){
+      h += `<line x1="${s.x+22}" y1="62" x2="${stages[i+1].x-22}" y2="62"
+            stroke="#2a323c" stroke-width="1.5" stroke-dasharray="3 4"/>`;
+    }
+    h += `<g transform="translate(${s.x},62) scale(2.1)">
+            <use href="#kid" fill="${s.fill}" ${s.stroke?`stroke="${s.stroke}" stroke-width="1.1"`:''}/>
+          </g>`;
+    h += `<text x="${s.x}" y="112" text-anchor="middle" fill="#97a1ad"
+           font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">${s.label}</text>`;
+    h += `<text x="${s.x}" y="128" text-anchor="middle" fill="#5c6672"
+           font-family="ui-sans-serif,system-ui,sans-serif" font-size="9">stage ${i+1}</text>`;
+  });
+  // one child's journey, on its own track so it never sits on top of a stage marker
+  h += `<line x1="38" y1="172" x2="602" y2="172" stroke="#232b34" stroke-width="1"/>`;
+  h += `<text x="38" y="196" fill="#5c6672"
+         font-family="ui-sans-serif,system-ui,sans-serif" font-size="9.5">one child's journey</text>`;
+  h += `<g id="traveller" transform="translate(60,160) scale(2.1)">
+          <use href="#kid" fill="none" stroke="${C.s0}" stroke-width="1.1"/></g>`;
+  svg.innerHTML = h;
+
+  const t = svg.querySelector('#traveller');
+  let i = 0;
+  setInterval(()=>{
+    i = (i+1) % stages.length;
+    const s = stages[i];
+    t.setAttribute('transform',`translate(${s.x},160) scale(2.1)`);
+    t.style.transition = 'transform .9s cubic-bezier(.4,0,.2,1)';
+    const u = t.querySelector('use');
+    u.setAttribute('fill', s.fill);
+    if(s.stroke){u.setAttribute('stroke',s.stroke);u.setAttribute('stroke-width','1.1');}
+    else{u.removeAttribute('stroke');}
+  }, 1800);
+})();
+
+/* ---------- Figure 2: the reachable set vs England ---------- */
+(function(){
+  const svg = document.getElementById('chart');
+  const W=900,H=420,M={t:28,r:36,b:56,l:74};
+  const xmin=60000, xmax=125000, ymin=0, ymax=1;
+  const px = v => M.l + (v-xmin)/(xmax-xmin)*(W-M.l-M.r);
+  const py = v => H-M.b - (v-ymin)/(ymax-ymin)*(H-M.t-M.b);
+
+  let g = '';
+  // grid
+  for(let v=60000; v<=125000; v+=10000){
+    g += `<line x1="${px(v)}" y1="${M.t}" x2="${px(v)}" y2="${H-M.b}" stroke="#232b34"/>`;
+    g += `<text x="${px(v)}" y="${H-M.b+20}" text-anchor="middle" fill="#5c6672"
+           font-family="ui-sans-serif,system-ui,sans-serif" font-size="11">${(v/1000)}k</text>`;
+  }
+  for(let v=0; v<=1.0001; v+=0.25){
+    g += `<line x1="${M.l}" y1="${py(v)}" x2="${W-M.r}" y2="${py(v)}" stroke="#232b34"/>`;
+    g += `<text x="${M.l-12}" y="${py(v)+4}" text-anchor="end" fill="#5c6672"
+           font-family="ui-sans-serif,system-ui,sans-serif" font-size="11">${Math.round(v*100)}%</text>`;
+  }
+  g += `<text x="${(M.l+W-M.r)/2}" y="${H-14}" text-anchor="middle" fill="#97a1ad"
+         font-family="ui-sans-serif,system-ui,sans-serif" font-size="12">plans issued per year</text>`;
+  g += `<text transform="translate(20,${(M.t+H-M.b)/2}) rotate(-90)" text-anchor="middle" fill="#97a1ad"
+         font-family="ui-sans-serif,system-ui,sans-serif" font-size="12">issued within 20 weeks</text>`;
+
+  // the reachable curve
+  const pts = rows.map(r=>`${px(r.issued)},${py(r.timely)}`).join(' ');
+  g += `<polyline points="${pts}" fill="none" stroke="#4a6b8a" stroke-width="2" opacity=".55"/>`;
+  rows.forEach(r=>{
+    g += `<circle cx="${px(r.issued)}" cy="${py(r.timely)}" r="2.6" fill="#4a6b8a" opacity=".5"/>`;
+  });
+
+  // England, actual
+  const ex=px(REAL.issued), ey=py(REAL.timely);
+  g += `<line x1="${ex-9}" y1="${ey-9}" x2="${ex+9}" y2="${ey+9}" stroke="${C.real}" stroke-width="3"/>`;
+  g += `<line x1="${ex-9}" y1="${ey+9}" x2="${ex+9}" y2="${ey-9}" stroke="${C.real}" stroke-width="3"/>`;
+  g += `<text x="${ex+16}" y="${ey-16}" fill="#e06b6b"
+         font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" font-weight="600">England, actual</text>`;
+  g += `<text x="${ex+16}" y="${ey-1}" fill="#97a1ad"
+         font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">110,708 plans</text>`;
+  g += `<text x="${ex+16}" y="${ey+13}" fill="#97a1ad"
+         font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">46.1% on time</text>`;
+  g += `<text x="${(px(rows[rows.length-1].issued)+ex)/2}" y="${py(.30)}" text-anchor="middle" fill="#6d7885"
+         font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" font-style="italic">the model cannot reach here</text>`;
+
+  // live marker + the gap it cannot close
+  g += `<line id="gapline" x1="0" y1="0" x2="0" y2="0" stroke="${C.s3}"
+         stroke-width="1.4" stroke-dasharray="4 4" opacity=".8"/>`;
+  g += `<circle id="marker" r="7.5" fill="${C.s3}" stroke="#14181d" stroke-width="2"/>`;
+  svg.innerHTML = g;
+
+  const marker=svg.querySelector('#marker'), gapline=svg.querySelector('#gapline');
+  const slider=document.getElementById('cap');
+  const fmt=n=>n.toLocaleString('en-GB');
+
+  function draw(i){
+    const r = rows[i];
+    const x=px(r.issued), y=py(r.timely);
+    marker.setAttribute('cx',x); marker.setAttribute('cy',y);
+    gapline.setAttribute('x1',x); gapline.setAttribute('y1',y);
+    gapline.setAttribute('x2',ex); gapline.setAttribute('y2',ey);
+    document.getElementById('r-ratio').textContent  = r.ratio.toFixed(2)+'×';
+    document.getElementById('r-issued').textContent = fmt(r.issued);
+    document.getElementById('r-timely').textContent = (r.timely*100).toFixed(1)+'%';
+    const dv = Math.round(100*(r.issued/REAL.issued-1));
+    const dt = Math.round(100*(r.timely-REAL.timely));
+    document.getElementById('r-gap').textContent =
+      `${dv>0?'+':''}${dv}% vol, ${dt>0?'+':''}${dt} pts`;
+  }
+  slider.max = rows.length-1;
+  slider.addEventListener('input',e=>draw(+e.target.value));
+  draw(+slider.value);
+
+  document.getElementById('auto').addEventListener('click',()=>{
+    let i=0; const id=setInterval(()=>{
+      slider.value=i; draw(i); i++;
+      if(i>=rows.length) clearInterval(id);
+    },55);
+  });
+})();
+</script>
+</body>
+</html>
