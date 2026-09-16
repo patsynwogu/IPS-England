@@ -10,7 +10,7 @@ capacity. They cannot.
 **Live page:** https://ips-england.netlify.app
 
 `public/index.html` is self-contained with no build step. Deploy the repo to Netlify with
-`publish = "public"` and it serves as it is.
+`publish = "public"` and it serves as is.
 
 ## What the model is
 
@@ -18,7 +18,7 @@ capacity. They cannot.
 unmet need to an Education, Health and Care plan. Families hold a navigational capacity and
 decide whether to appeal when refused. Authorities screen requests, assess at their own
 capacity with no central coordinator, and see successful appeals return to their queue. Weekly
-time step, four-year horizon, final year reported, every published figure the mean of ten random
+time step, four-year horizon, final year reported, every published figure is the mean of ten random
 seeds.
 
 A `pressure_beta` parameter that raises an authority's refusal rate with its own backlog is
@@ -30,12 +30,12 @@ check 2 below.
 Two statutory gates, both measured against published data. 26.6% of requests refused
 progression to an assessment, and 6.0% of assessments producing no plan. The published 26.6%
 is the rate after appeals have resolved, so the model infers the gross rate whose post-appeal
-residue equals it. At an 18% appeal rate that gross figure is 32.4%.
+residue equals it. At an 18% appeal rate, that gross figure is 32.4%.
 
 ## The findings
 
 England in calendar year 2025 issued 110,708 new plans against 162,702 requests, with 46.1%
-issued inside the twenty-week statutory deadline.
+issued within the twenty-week statutory deadline.
 
 **Funding and contestability do not do the same work.** Around 50,000 children a year are
 refused support they were referred for. Doubling assessment capacity changes that population
@@ -63,7 +63,7 @@ Section Six of the page.
 
 ## Validation, including what failed
 
-Five checks. Two failed and both are reported on the page.
+Five checks. Two failed, and both are reported on the page.
 
 1. **Seed variation.** Version 1.4 reported a single draw that sat near the favourable end of a
    six-point spread. Every figure is now a ten-seed mean with a standard deviation.
@@ -87,7 +87,7 @@ and a single-seed timeliness figure reported as a central value.
 
 Note on what is not a check. The model places 50,081 children a year outside a plan against a
 published 50,500. Applying the two published gate rates to the published request total gives
-roughly 50,400 before any simulation runs, so this is the inputs restated, not independent
+roughly 50,400 before any simulation runs, so these are the inputs restated, not independent
 corroboration. The page says so.
 
 ## Reproducing the numbers
