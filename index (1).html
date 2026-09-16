@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPS-England · Simulating England's SEND Identification and Assessment Process</title>
+<style>
+:root{
+  --paper:#f7f5f2; --ink:#16191d; --ink-soft:#565d66; --rule:#ddd8d1;
+  --panel:#000000; --panel-soft:#131313; --panel-ink:#e8eaed; --panel-ink-soft:#97a1ad;
+  --s0:#8892a0; --s1:#6b7d8f; --s2:#4a6b8a; --s3:#c4703d; --s4:#2d4a63;
+  --real:#b33c3c; --hit:#3f8f7a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.65 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:0 24px}
+.wide{max-width:960px;margin:0 auto;padding:0 24px}
+header{padding:84px 0 36px;border-bottom:1px solid var(--rule);margin-bottom:52px}
+h1{font-size:2.3rem;line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:600}
+.standfirst{font-size:1.12rem;color:var(--ink-soft);margin:0 0 22px}
+.meta{font:500 .76rem/1.5 Arial,"Helvetica Neue",Helvetica,sans-serif;color:var(--ink-soft);
+  letter-spacing:.07em;text-transform:uppercase}
+section{margin:0 0 68px}
+.kicker{font:600 .72rem/1 Arial,"Helvetica Neue",Helvetica,sans-serif;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:12px}
+h2{font-size:1.55rem;line-height:1.25;margin:0 0 18px;font-weight:600;letter-spacing:-.01em}
+h3{font-size:1.05rem;margin:32px 0 10px;font-weight:600}
+p{margin:0 0 18px}
+.lede{font-size:1.07rem}
+.fig{background:var(--panel);border-radius:6px;margin:32px 0;padding:26px 26px 20px;color:var(--panel-ink)}
+.fig-label{font:600 .7rem/1 Arial,"Helvetica Neue",Helvetica,sans-serif;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--panel-ink-soft);margin-bottom:18px}
+.fig-cap{font:.82rem/1.55 Georgia,"Times New Roman",Times,serif;color:var(--panel-ink-soft);
+  margin-top:16px;padding-top:14px;border-top:1px solid #2b2b2b}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;
+  font:.74rem/1.4 Georgia,"Times New Roman",Times,serif;color:var(--panel-ink-soft)}
+.legend span{display:flex;align-items:center;gap:6px}
+.narrate{font:1rem/1.55 Georgia,"Times New Roman",Times,serif;color:#cfd3d8;margin-top:14px;padding:12px 16px;background:#101010;border-radius:4px;min-height:52px}
+.narrate b{color:#fff}
+.sw{width:11px;height:11px;border-radius:2px;display:inline-block;flex:none}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab,.btn{font:500 .82rem Arial,"Helvetica Neue",Helvetica,sans-serif;background:transparent;
+  color:var(--panel-ink-soft);border:1px solid #333333;border-radius:4px;padding:8px 15px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--panel-soft);color:var(--panel-ink);border-color:#4a6b8a}
+.btn:hover,.tab:hover{background:#1c1c1c;color:var(--panel-ink)}
+.controls{display:flex;align-items:center;gap:14px;margin:18px 0 4px;flex-wrap:wrap}
+input[type=range]{flex:1;min-width:190px;accent-color:#5b8db8;height:4px;background:#2b2b2b;border-radius:3px}
+.ctl-label{font:.8rem Georgia,"Times New Roman",Times,serif;color:var(--panel-ink-soft);min-width:200px}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;
+  background:#2b2b2b;border-radius:4px;overflow:hidden;margin-top:18px}
+.rd{background:var(--panel);padding:13px 15px}
+.rd .v{font:600 1.4rem/1.1 Arial,"Helvetica Neue",Helvetica,sans-serif;letter-spacing:-.02em}
+.rd .l{font:.71rem/1.4 Arial,"Helvetica Neue",Helvetica,sans-serif;color:var(--panel-ink-soft);margin-top:5px}
+.rd.gap .v{color:var(--s3)}
+.rd.gap.hit .v{color:#5fbfa6}
+.claim{border-left:3px solid var(--ink);padding:4px 0 4px 22px;margin:28px 0;
+  font-size:1.1rem;line-height:1.55}
+.note{background:#efece7;border-radius:5px;padding:18px 22px;margin:24px 0;
+  font-size:.92rem;color:var(--ink-soft)}
+.note b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;margin:20px 0;font:.84rem/1.5 Arial,"Helvetica Neue",Helvetica,sans-serif}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--ink-soft);font-size:.74rem;text-transform:uppercase;letter-spacing:.07em}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+caption{caption-side:bottom;text-align:left;padding-top:9px;color:var(--ink-soft);font-size:.79rem}
+footer{border-top:1px solid var(--rule);padding:26px 0 110px;margin-top:70px;
+  font:.82rem/1.7 Georgia,"Times New Roman",Times,serif;color:var(--ink-soft)}
+a{color:#2d5a80}
+@media(max-width:600px){h1{font-size:1.75rem}.fig{padding:18px 14px 14px}.ctl-label{min-width:100%}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="kid">
+    <circle cx="0" cy="-7.2" r="3.1"/>
+    <path d="M-3.3,-3.4 h6.6 a1.5,1.5 0 0 1 1.5,1.5 v5.2 a1.1,1.1 0 0 1 -2.2,0 v-1.2 h-0.5 v6.6
+             a1.3,1.3 0 0 1 -2.6,0 v-4.1 h-0.7 v4.1 a1.3,1.3 0 0 1 -2.6,0 v-6.6 h-0.5 v1.2
+             a1.1,1.1 0 0 1 -2.2,0 v-5.2 a1.5,1.5 0 0 1 1.5,-1.5 z"/>
+  </g>
+</defs></svg>
+
+<div class="wrap">
+<header>
+  <div class="meta">IPS-England &middot; Version 1.5 &middot; September 2026 &middot; <a href="https://doi.org/10.7910/DVN/NAFBST">doi:10.7910/DVN/NAFBST</a></div>
+  <h1>More Money Buys More Plans, Not Fewer Children Turned Away</h1>
+  <p class="standfirst">Around 50,000 children a year in England are refused support they were
+  referred for, and most of them never come back. A simulation of the statutory pathway finds that
+  the size of that population is almost completely unresponsive to assessment funding. Doubling
+  assessment capacity changes it by one per cent. The one setting that moves it is how far an appeal
+  is within a family's reach, which halves it. Appeal access is a mechanism the model assumes rather
+  than one it discovers, so the result that carries weight here is the asymmetry between the two
+  levers, not the existence of the second.</p>
+  <div class="meta">Patsy Nwogu &middot; Computational Governance</div>
+</header>
+
+<section>
+  <div class="kicker">Section One</div>
+  <h2>Simulating England's SEND Identification and Assessment Process</h2>
+  <p class="lede">IPS-England is an agent-based model of the statutory pathway a child in England
+  travels from an unmet special educational need to an Education, Health and Care plan. That plan is
+  a legal document obliging a council to fund and provide the support it names, and the system
+  producing it is known in England as SEND, for special educational needs and disabilities. The
+  model represents individual children moving through five stages across all 152 local authorities,
+  the councils carrying the legal duty to assess and to issue plans. Families decide whether to
+  appeal when they are refused, and authorities screen requests under caseload pressure, so both
+  sides of the gate act rather than merely queue.</p>
+  <p>What is at stake in that pathway is time in a child's education, and for some children whether
+  they are recognised at all. A child waiting for an assessment sits in a classroom every day without
+  the support the law says they are owed, and the wait falls during years that do not come back. A
+  child refused an assessment whose family cannot appeal simply leaves the system, and England
+  records nothing about what happens to them next.</p>
+  <p>The model was built to test one thing. Delay and shortfall in the English system are almost
+  universally explained by a shortage of assessment staff, and that explanation is what IPS-England
+  was constructed to represent. The intention was to reproduce England from it and then use the
+  working model to examine different resourcing decisions. It could not reproduce England from that
+  assumption at any staffing level, and everything below is what followed from that failure.</p>
+
+  <h3>Data</h3>
+  <p>Every figure the model is calibrated or tested against is published, and no number on this page
+  is estimated where a published one exists.</p>
+  <table>
+    <caption>Table 1 &middot; Sources, Reference Periods and Use</caption>
+    <tr><th>Source</th><th>Period</th><th>Used For</th></tr>
+    <tr><td>DfE, <i>Education, health and care plans</i></td><td>Calendar year 2025, published January 2026</td>
+        <td>The targets the model has to reproduce: 162,702 requests for assessment, 110,708 new plans issued, 46.1% issued within the twenty-week deadline, 43,300 requests refused progression to assessment and 7,200 assessments producing no plan</td></tr>
+    <tr><td>DfE, <i>Special educational needs in England</i></td><td>Academic years 2015/16 to 2025/26</td>
+        <td>The eleven-year trend in identification, used to set how children enter the pathway. Identification rose from 14.4% to 20.8% of pupils across that period</td></tr>
+    <tr><td>Ministry of Justice, <i>Tribunal Statistics</i></td><td>Academic year 2024/25</td>
+        <td>Roughly 25,000 SEND appeals registered across all grounds, with 99% of decided cases going in favour of families. Used to bound the appeal behaviour the model assumes</td></tr>
+  </table>
+  <p>The two DfE series count different populations and are not interchangeable. The plans release
+  covers all ages from birth to twenty-five across every setting and reports 718,838 plans in force
+  at January 2026. The school census covers school pupils only and reports 538,547 with plans in
+  2025/26. Where the two appear together on this page the distinction is stated.</p>
+
+  <h3>Parameters</h3>
+  <p>Three categories, kept separate throughout, since the difference between a value that was
+  measured, a value that was assumed and a value that was swept is what determines how much weight a
+  result can carry.</p>
+  <table>
+    <caption>Table 2 &middot; Model Parameters by Status</caption>
+    <tr><th>Parameter</th><th>Value</th><th>Status</th></tr>
+    <tr><td>Local authorities</td><td>152</td><td>Measured</td></tr>
+    <tr><td>Statutory deadline</td><td>20 weeks</td><td>Measured, set in regulation</td></tr>
+    <tr><td>Requests for assessment</td><td>162,702 per year</td><td>Measured</td></tr>
+    <tr><td>Refused progression to assessment</td><td>26.6%</td><td>Measured, 43,300 of 162,700 in 2025</td></tr>
+    <tr><td>Assessed with no plan issued</td><td>6.0%</td><td>Measured, 7,200 of 118,800 in 2025</td></tr>
+    <tr><td>Gross refusal before appeals</td><td>32.4%</td><td>Derived, the rate whose post-appeal residue equals the published 26.6%</td></tr>
+    <tr><td>Share of refused families who appeal</td><td>18%</td><td>Assumed, bounded by the roughly 25,000 appeals registered across all grounds</td></tr>
+    <tr><td>Appeal duration and success rate</td><td>30 weeks, 99%</td><td>Assumed duration, measured success rate</td></tr>
+    <tr><td>Assessment capacity</td><td>0.70 to 1.82 times demand</td><td>Swept</td></tr>
+    <tr><td>Statutory process duration</td><td>10 to 26 weeks</td><td>Swept</td></tr>
+    <tr><td>Variation in process duration between cases</td><td>Gamma, coefficient of variation 0.45</td><td>Assumed</td></tr>
+    <tr><td>Spread of family navigational capacity</td><td>Lognormal, sigma 0.80</td><td>Assumed</td></tr>
+    <tr><td>Caseload distribution across authorities</td><td>Lognormal, sigma 0.65</td><td>Assumed, pending the published per-authority breakdown</td></tr>
+    <tr><td>Capacity distribution across authorities</td><td>Lognormal, sigma 0.45</td><td>Assumed, pending the same</td></tr>
+    <tr><td>Time step and horizon</td><td>Weekly, four years, final year reported</td><td>Design choice, tested in Section Seven</td></tr>
+    <tr><td>Random seeds per reported figure</td><td>10</td><td>Design choice. Every figure on this page is a mean across seeds</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="kicker">Section Two</div>
+  <h2>Why Simulate</h2>
+  <p class="lede">Simulation earns its place here for a reason specific to this system rather than as
+  a general preference for modelling. The records a survey would need do not exist.</p>
+  <p>England counts children who pass through the gates of the special educational needs system. It
+  does not count children whose needs were never noticed; it does not record what provision a child
+  received once a plan was written; and it does not follow the children it turns away. Two of the
+  five stages in the pathway below produce no national statistics at all. You cannot survey what
+  nobody writes down.</p>
+  <p>What an agent-based model offers instead is a test of sufficiency. Rather than measuring a
+  correlation between resourcing and outcome, it asks whether a stated mechanism, run forward with
+  individual children arriving, being screened, waiting and in some cases giving up, generates the
+  country we observe. Interaction effects that a regression treats as noise become visible in the
+  run: queues form, clear and re-form; some authorities absorb demand while others accumulate it;
+  and a refusal falls very differently on two families with the same child and different capacity to
+  fight it.</p>
+  <p>That gives a hard criterion. An explanation that cannot generate England is wrong, whatever its
+  standing in the policy literature, and the findings below rest on that criterion rather than on a
+  fit statistic.</p>
+</section>
+
+<section>
+  <div class="kicker">Section Three</div>
+  <h2>The Pathway</h2>
+  <p>A child with an unmet need travels through five stages before the state formally recognises
+  them. Need exists. Someone notices. A request is made. An assessment is carried out. A plan is
+  issued. Every stage can fail, and the failures differ in kind. A child can go unnoticed. A request
+  can be refused. An assessment can run past its deadline. A plan can be written and still not change
+  what happens in the classroom on Monday.</p>
+  <p>Step through the pathway below, and two things become apparent. The first is where children are
+  lost: roughly 50,500 requests a year do not become plans. The second is that the earliest two
+  stages carry no national figure at all, which is the argument for simulating rather than surveying,
+  made in numbers rather than asserted.</p>
+
+  <div class="fig">
+    <div class="fig-label">Figure 1 &middot; The Pathway, on a Clock</div>
+    <div class="tabs">
+      <button class="btn" id="f1-play">Pause</button>
+      <button class="btn" id="f1-speed">Speed 1&times;</button>
+      <button class="btn" id="f1-follow">Follow Another Child</button>
+      <button class="btn" id="f1-reset">Start Again</button>
+    </div>
+    <svg id="pathway" viewBox="0 0 880 398" style="width:100%;height:auto" role="img"
+      aria-label="An animation of the statutory pathway laid out on a time axis. Distance from left to right is weeks since a child's request for an assessment, with a dashed line at the twenty-week statutory deadline. Four lanes run across the axis: plans issued, children waiting, children appealing a refusal, and children who left without a plan. Children pass through three uncounted stages at the far left before joining the axis. One figure stands for a thousand children, so the number in each lane is the real national stock. Running counts of the week, figures on screen, children waiting, children appealing, children who left without a plan, plans issued and the share issued within twenty weeks are shown below the axis."></svg>
+    <div class="narrate" id="f1-narrate"></div>
+    <div class="legend">
+      <span><i class="sw" style="background:#7d8896"></i>Not Yet Counted</span>
+      <span><i class="sw" style="background:#6e93b8"></i>Waiting, Inside the Deadline</span>
+      <span><i class="sw" style="background:#d08a4e"></i>Past the Twenty-Week Deadline</span>
+      <span><i class="sw" style="background:#9b7fc4"></i>Appealing a Refusal</span>
+      <span><i class="sw" style="background:#4fa88e"></i>Plan Issued on Time</span>
+      <span><i class="sw" style="background:#c04a4a"></i>Left Without a Plan</span>
+    </div>
+    <div class="fig-cap" id="f1cap"></div>
+  </div>
+
+  <p>The animation is made of eight transitions and two durations. They are set out below so that
+  the picture can be checked against the numbers without opening the repository.</p>
+
+  <table>
+    <caption>Table 3 &middot; The Transitions the Animation Is Made Of<br><span style="font-weight:400">Where a flow is a residual rather than a published count, England&rsquo;s own figure is given beside it. The three residuals sit within 1.4% of the published totals, and that gap is the model&rsquo;s volume shortfall discussed in Section Seven.</span></caption>
+    <tr><th>From</th><th>To</th><th class="n">Rate</th><th class="n">Children a Year</th><th>Status</th></tr>
+    <tr><td>Outside the count</td><td>Request made</td><td class="n">&mdash;</td><td class="n">162,702</td>
+        <td>Measured. DfE, calendar year 2025</td></tr>
+    <tr><td>Request made</td><td>Refused an assessment</td><td class="n">32.4%</td><td class="n">52,715</td>
+        <td>Derived. The gross rate whose post-appeal residue equals the published net 26.6%</td></tr>
+    <tr><td>Refused</td><td>Appeal lodged</td><td class="n">18.0%</td><td class="n">9,489</td>
+        <td>Assumed. Bounded by the roughly 25,000 SEND appeals registered across all grounds</td></tr>
+    <tr><td>Appeal lodged</td><td>Back into the assessment queue</td><td class="n">99.0%</td><td class="n">9,394</td>
+        <td>Measured. Ministry of Justice, share of decided cases going in favour of families</td></tr>
+    <tr><td>Refused</td><td>Left the pathway</td><td class="n">82.0%</td><td class="n">43,321</td>
+        <td>Residual. England publishes 43,300</td></tr>
+    <tr><td>Request made</td><td>Assessment carried out</td><td class="n">&mdash;</td><td class="n">119,381</td>
+        <td>Residual, including appeal returns. England publishes 118,800</td></tr>
+    <tr><td>Assessment</td><td>No plan issued</td><td class="n">6.0%</td><td class="n">7,163</td>
+        <td>Measured rate. England publishes 7,200</td></tr>
+    <tr><td>Assessment</td><td>Plan issued</td><td class="n">94.0%</td><td class="n">112,218</td>
+        <td>Residual. England publishes 110,708</td></tr>
+    <tr><td colspan="2">Statutory process, average duration</td><td class="n">20.5 wks</td><td class="n">&mdash;</td>
+        <td>Calibrated. The duration at which the model reproduces England&rsquo;s timeliness</td></tr>
+    <tr><td colspan="2">Appeal, average duration</td><td class="n">30 wks</td><td class="n">&mdash;</td>
+        <td>Assumed. A published distribution of tribunal timescales would replace it</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="kicker">Section Four</div>
+  <h2>The First Finding: Funding and Contestability Do Not Do the Same Work</h2>
+  <p class="lede">England's own figures say 43,300 requests a year are refused progression to an
+  assessment and a further 7,200 assessments produce no plan. Together that is 50,500 children
+  referred for support who do not receive it. What the published figures cannot say is what happens
+  to them next, since nobody follows them.</p>
+  <p>The model places 50,081 children a year outside a plan, with a standard deviation of 207 across
+  ten seeds. That figure is close to the published 50,500, and it should not be read as a check on
+  the model. Applying the two published gate rates to the published request total gives roughly
+  50,400 before any simulation is run, so reproducing it is the inputs restated rather than a finding.
+  It is reported here to show the accounting closes, and nothing more is claimed for it.</p>
+  <p>The interesting part is who comes back. Refusals are overturned on appeal at very high rates, so
+  the gate cannot be filtering by need. The model represents it as filtering by whether a family can
+  mount an appeal at all, and that representation is an assumption carried into the model rather than
+  a result taken out of it. Under it, 8,492 children a year reach a plan only by appealing, with a
+  standard deviation of 137, taking a median of 51.4 weeks, a year against a twenty-week deadline.
+  None of them appear in any timeliness statistic England publishes.</p>
+  <p>What the model does decide, rather than assume, is how far each lever moves that population. The
+  assumption that appeal access is unequal does not fix how much it matters relative to money, and
+  nothing in the model forces assessment funding to be inert. Testing both produces the central
+  result.</p>
+
+  <table>
+    <caption>Table 4 &middot; What Changes the Number of Children Who Leave Without a Plan<br><span style="font-weight:400">Mean of ten seeds. Baseline standard deviation 207.</span></caption>
+    <tr><th>Change</th><th class="n">Children Leaving</th><th class="n">Against Baseline</th></tr>
+    <tr><td>Baseline</td><td class="n">50,081</td><td class="n">&mdash;</td></tr>
+    <tr><td>Assessment capacity increased by half</td><td class="n">50,397</td><td class="n">+0.6%</td></tr>
+    <tr><td>Assessment capacity doubled</td><td class="n">50,577</td><td class="n">+1.0%</td></tr>
+    <tr><td>Statutory process shortened to 16 weeks</td><td class="n">50,081</td><td class="n">0.0%</td></tr>
+    <tr><td>Appeals resolved in 10 weeks rather than 30</td><td class="n">50,156</td><td class="n">+0.2%</td></tr>
+    <tr><td>Appeal within reach of 40% of families</td><td class="n">39,219</td><td class="n">&minus;21.7%</td></tr>
+    <tr><td>Appeal within reach of 70% of families</td><td class="n">24,354</td><td class="n">&minus;51.4%</td></tr>
+  </table>
+
+  <div class="claim">Money does not move this population. The two funding levers change it by one per
+  cent while widening access to appeal halves it. Conditional on contestability being unequally
+  distributed, identification in England is rationed by what families can contest rather than by what
+  the system can afford, and the size of that gap between the two levers is the model's result rather
+  than its premise.</div>
+
+  <p>One consequence is worth stating plainly. When appeal becomes reachable by seven families in ten,
+  plans issued rise from 107,952 to 126,657 and published timeliness falls from 45.8% to 39.9%. The
+  statistic the system is judged on gets worse at exactly the point more children receive what they
+  are legally entitled to.</p>
+</section>
+
+<section>
+  <div class="kicker">Section Five</div>
+  <h2>The Second Finding: The Deadline Is Shorter Than the Process</h2>
+  <p class="lede">The same model answers a second question, and it points the same way. Assessment
+  delay in England is almost always explained by a shortage of caseworkers. Requests arrive faster
+  than they can be picked up, a queue forms, and children wait.</p>
+  <p>Sweeping assessment capacity across its full plausible range produced no setting that reproduces
+  England. Tune capacity down until timeliness comes closest to England, at 46.4%, and the model issues
+  90,204 plans a year, 18.5% fewer than England issues. Tune capacity up until volume comes closest, at
+  109,873 plans, and timeliness climbs to 92.4%, forty-six points better than England manages. The two
+  targets move in opposite directions and the gap never closes.</p>
+  <p>The model comes close to England only when the statutory process itself is allowed to take longer.
+  Holding capacity at a level where most queues stay short and letting the sequence run for an average
+  of 20.5 weeks produces 45.8% inside the deadline against England's 46.1%, with a standard deviation
+  of 2.0 points across ten seeds and England's figure inside the range every seed produced. Volume is
+  the weaker half of that fit. The model issues 107,952 plans a year against England's 110,708, 2.5%
+  short, and England sits just outside the seed range. The residual is stated here rather than tuned
+  away, and Section Seven says where it comes from. The sequence being represented is the six-week
+  window to decide whether to assess, the six weeks professionals are given to respond, then drafting,
+  consultation and issue, all running one after another by regulation.</p>
+</section>
+</div>
+
+<div class="wide">
+  <div class="fig">
+    <div class="fig-label">Figure 2 &middot; Can Either Explanation of Delay Reach England?</div>
+    <div class="tabs" role="tablist" aria-label="Choose an explanation of delay">
+      <button class="tab" id="tab-a" role="tab" aria-selected="true" aria-controls="chart">Not Enough Caseworkers</button>
+      <button class="tab" id="tab-b" role="tab" aria-selected="false" aria-controls="chart">The Process Takes Too Long</button>
+    </div>
+    <div class="controls">
+      <label class="ctl-label" id="slider-label" for="dial">Assessment Capacity, Relative to Demand</label>
+      <input type="range" id="dial" min="0" max="10" value="4" step="1" aria-labelledby="slider-label">
+    </div>
+    <svg id="chart" viewBox="0 0 900 430" style="width:100%;height:auto" role="img"
+      aria-label="Plans issued per year plotted against the share issued within twenty weeks. England's actual position is marked with a red cross. The plotted curve shows every outcome the selected explanation can produce."></svg>
+    <div class="readout">
+      <div class="rd"><div class="v" id="r-param">—</div><div class="l" id="r-param-l">Capacity Setting</div></div>
+      <div class="rd"><div class="v" id="r-issued">—</div><div class="l">Plans Issued per Year</div></div>
+      <div class="rd"><div class="v" id="r-timely">—</div><div class="l">Issued Within 20 Weeks</div></div>
+      <div class="rd gap"><div class="v" id="r-gap">—</div><div class="l">Distance From England</div></div>
+    </div>
+    <div class="fig-cap" id="cap2"></div>
+  </div>
+</div>
+
+<div class="wrap">
+<section>
+  <div class="claim">A statutory sequence averaging a little over twenty weeks will miss a twenty-week
+  deadline roughly half the time, however many people are employed to run it. The deadline is not a
+  target the system is failing to hit through under-resourcing. It is shorter than the process takes
+  to run.</div>
+  <p>For a child, that distinction decides what happens next. Under the resourcing account a late
+  assessment is a queueing problem that more funding eventually clears. Here the wait is produced by
+  the rules themselves, so a child whose plan arrives four weeks late is not unlucky in a stretched
+  authority, and the same four weeks would have been lost in a well-staffed one.</p>
+</section>
+
+<section>
+  <div class="kicker">Section Six</div>
+  <h2>The Hypothesis</h2>
+  <div class="claim">Access to special educational needs provision in England is governed by the
+  statutory architecture rather than by the resources available to run it. Who is identified is
+  determined by which families can contest a refusal, and how long identification takes is determined
+  by the duration of the mandated sequence. Neither responds materially to staffing.</div>
+  <p>This is a claim rather than a conclusion, and it is written so that someone can kill it. Three
+  tests, none of which needs this model or its author.</p>
+  <p>On access, compare refusal rates and appeal rates across local authorities against the socioeconomic
+  composition of their populations. The hypothesis predicts appeal rates track family resources rather
+  than tracking refusal rates, so that authorities refusing at similar rates lose very different numbers
+  of children depending on who lives there.</p>
+  <p>On delay, identify local authorities that materially increased assessment staffing and compare the
+  change in their throughput against the change in their twenty-week performance. The hypothesis
+  predicts throughput rose and timeliness did not follow.</p>
+  <p>On the process, audit directly how long each mandated step consumes in practice. If the sequence
+  can be executed inside twenty weeks at realistic staffing, the second finding is wrong.</p>
+  <p>It matters because the reform programme now running to 2030 rests on an account the model could
+  not make work. Where access is governed by contestability and delay by process architecture,
+  additional funding buys more plans and roughly the same waiting, and leaves untouched the children
+  whose families could not appeal in the first place.</p>
+</section>
+
+<section>
+  <div class="kicker">Section Seven</div>
+  <h2>Model Validation</h2>
+  <p class="lede">A model that only ever confirms what it was built to show is not a research
+  instrument. Five checks run against this one. Two of them failed, and both failures are reported
+  below along with what was changed in response.</p>
+
+  <h3>Seed Variation, and What It Cost the Previous Version</h3>
+  <p>Version 1.4 reported the model at a single random seed. Rerunning the identical specification
+  across ten seeds showed timeliness varying by close to six percentage points between draws, and the
+  published figure sat near the favourable end of that spread. Every quantity on this page is now the
+  mean of ten seeds with its standard deviation stated. At the calibrated setting the model produces
+  45.8% inside the deadline with a standard deviation of 2.0 points, against England's 46.1%, and
+  107,952 plans a year with a standard deviation of 1,015, against England's 110,708. The timeliness
+  fit holds. The volume fit is 2.5% short, and the next check explains why.</p>
+
+  <h3>Steady State, Which This Model Does Not Reach</h3>
+  <p>Running the same specification to longer horizons shows timeliness falling monotonically, from
+  47.3% at two years to 43.9% at eight. A model whose headline statistic depends on when you stop
+  watching has not settled, so the source was located rather than left as noise. Assessment capacity
+  is drawn per authority, and at the calibrated setting 22 of the 152 authorities hold less capacity
+  than their own inflow. Their queues grow without bound while every other authority stays flat. Over
+  ten years the national queue rises from 2,557 to 26,926 cases and 99% of that growth sits inside
+  those 22 authorities.</p>
+  <p>Two things follow. The four-year reporting point is a stated convention rather than a converged
+  value, and every figure on this page should be read as the state of the system four years into that
+  divergence. The 2.5% volume shortfall is the same phenomenon, since plans still queued in those
+  authorities are not issued inside the reporting year. A national average is not a stable property of
+  this system, which is a result about English SEND rather than an inconvenience in the code, and it
+  is the reason the per-authority data named in Section Eight is the first thing this model needs.</p>
+
+  <h3>Time Resolution</h3>
+  <p>The same configuration run at 26, 52, 104 and 208 steps per year gives 44.8%, 45.1%, 45.4% and
+  45.2% timeliness, and plans issued within 0.4% across all four. Nothing reported here is an artefact
+  of the weekly time step.</p>
+
+  <h3>Independence of the Random Streams</h3>
+  <p>Version 1.4 drew process duration from the same generator as every queueing decision, so changing
+  the duration parameter silently changed which children were refused and when. The duration curve in
+  Figure 2 appeared to move volume, which duration cannot do. Duration now draws from its own stream.
+  The curve is vertical as a result, and that is the correct behaviour: how long the statutory process
+  takes changes when plans are issued and not how many.</p>
+
+  <h3>Sensitivity to the Parameter Carrying the Delay Argument</h3>
+  <p>The second finding hinges on how long the statutory process takes, so that dependence is reported
+  rather than buried. Holding capacity adequate and varying only the process duration gives the
+  following.</p>
+  <table>
+    <caption>Table 5 &middot; Timeliness by Process Duration, Capacity Held Adequate<br><span style="font-weight:400">Mean of ten seeds. Standard deviation between 2.0 and 3.5 points.</span></caption>
+    <tr><th>Process Duration</th><th class="n">Issued Within 20 Weeks</th><th>Reading</th></tr>
+    <tr><td>10 weeks</td><td class="n">85.0%</td><td>Far better than England</td></tr>
+    <tr><td>14 weeks</td><td class="n">72.3%</td><td>Far better than England</td></tr>
+    <tr><td>18 weeks</td><td class="n">55.6%</td><td>Still better than England</td></tr>
+    <tr><td>20 weeks</td><td class="n">47.6%</td><td>Closer, still too good</td></tr>
+    <tr><td>20.5 weeks, with variation</td><td class="n">45.8%</td><td>England reports 46.1%</td></tr>
+  </table>
+  <p>No short-process configuration reaches England, which is why the finding is stated as a claim
+  about process duration and not about staffing levels.</p>
+
+  <h3>Results Withdrawn During Development</h3>
+  <p>Four results were taken out of this model before publication and none of them appears anywhere on
+  this page. A claimed ratio between high-issuing and low-issuing authorities was Monte Carlo noise at
+  the agent counts then in use. Per-authority monthly capacity was floored to a whole number each
+  month rather than carrying its remainder forward, which stalled queues that should have moved. Appeal
+  returns were added on top of the published refusal rate rather than inside it, which overstated plans
+  issued by 17%. A single-seed timeliness figure was reported as though it were the model's central
+  value. Each was found by a check listed above, and the checks are in the repository alongside the
+  model so that they run against any future version.</p>
+
+  <h3>Reproducibility</h3>
+  <p>Every number on this page is computed in Python and written to a data file that the page reads.
+  The page recomputes nothing, so the published figures and the model cannot drift apart. The model,
+  the source data and the script that generates the figures are in the repository linked below, and
+  running one command reproduces the whole set. The same files are deposited in Harvard Dataverse
+  under <a href="https://doi.org/10.7910/DVN/NAFBST">doi:10.7910/DVN/NAFBST</a>, so a version of
+  record exists independently of this page and of the repository.</p>
+</section>
+
+<section>
+  <div class="kicker">Section Eight</div>
+  <h2>Model Limitations</h2>
+  <p>Navigational capacity is a single modelled quantity standing in for everything that makes an
+  appeal reachable or unreachable for a family. It is not measured, and nothing on this page
+  identifies which families hold more or less of it. The first finding says that identification is
+  sorted by that quantity. It does not say which children are on the wrong side of it, and the
+  published data cannot currently answer that.</p>
+  <p>The share of refused families who appeal is assumed at 18% rather than measured. Published
+  tribunal statistics count appeals across all grounds together, so the share brought against these
+  two refusal decisions specifically is not separable from the published total. The counterfactuals in
+  Section Four vary that share deliberately, which is why they are stated as counterfactuals rather
+  than forecasts.</p>
+  <p>How long an appeal takes is assumed at 30 weeks. A published distribution of tribunal timescales
+  would replace it.</p>
+  <p>Authority-level caseload and capacity dispersion are modelled as lognormal distributions rather
+  than the published per-authority breakdown. Until that is replaced, no claim should be drawn from
+  this model about variation between individual authorities.</p>
+  <p>The variation in process duration between cases is assumed rather than measured. A published
+  distribution of actual step durations would replace it, and the audit proposed in Section Six would
+  produce exactly that.</p>
+  <p>The stage that brings children into the pathway is calibrated to the national trend in
+  identification and its absolute level remains an assumption. Nothing on this page should be read as a
+  claim about how many children are never noticed at all.</p>
+  <p>Finally, this model addresses access and delay rather than outcome. A plan issued within twenty
+  weeks is recorded here as a success, and whether the provision that followed helped the child is a
+  separate question no national dataset currently answers.</p>
+</section>
+
+<footer>
+  <p><strong>IPS-England, version 1.5.</strong> Agent-based model of the SEND identification and
+  assessment pathway. 152 local authorities, weekly time step, four-year horizon, final year reported,
+  every figure the mean of ten random seeds.</p>
+  <p><strong>Sources.</strong> DfE, <i>Education, health and care plans</i>, January 2026. DfE,
+  <i>Special educational needs in England</i>, 2015/16 to 2025/26. Ministry of Justice,
+  <i>Tribunal Statistics</i>, 2024/25.</p>
+  <p><strong>Code and Data.</strong> <a href="https://github.com/patsynwogu/IPS-England">Repository</a>. Contains the model, the source data, and the script that generates every number here.</p>
+  <p><strong>Archived Dataset.</strong> Harvard Dataverse, <a href="https://doi.org/10.7910/DVN/NAFBST">https://doi.org/10.7910/DVN/NAFBST</a>. The model, the data file every figure is read from, and this page, deposited and citable.</p>
+  <p>Patsy Nwogu &middot; ORCID <a href="https://orcid.org/0009-0005-2524-4559">0009-0005-2524-4559</a></p>
+</footer>
+</div>
+
+<script>
+const SWEEP = {"actual":{"issued":110708,"timely":0.461,"requests":162702,"deadline":20,"gate1":0.266,"gate2":0.06,"published_no_plan":50500},"n_seeds":10,"queue_curve":[{"ratio":0.7,"issued":74475,"timely":0.2394},{"ratio":0.74,"issued":77582,"timely":0.3002},{"ratio":0.78,"issued":80335,"timely":0.3609},{"ratio":0.82,"issued":83213,"timely":0.4003},{"ratio":0.86,"issued":85584,"timely":0.4184},{"ratio":0.9,"issued":87978,"timely":0.4445},{"ratio":0.94,"issued":90204,"timely":0.4643},{"ratio":0.98,"issued":92162,"timely":0.5047},{"ratio":1.02,"issued":94191,"timely":0.5532},{"ratio":1.06,"issued":95655,"timely":0.5692},{"ratio":1.1,"issued":97490,"timely":0.6046},{"ratio":1.14,"issued":98839,"timely":0.6238},{"ratio":1.18,"issued":100289,"timely":0.6579},{"ratio":1.22,"issued":101406,"timely":0.684},{"ratio":1.26,"issued":102340,"timely":0.7173},{"ratio":1.3,"issued":103408,"timely":0.7322},{"ratio":1.34,"issued":104553,"timely":0.757},{"ratio":1.38,"issued":105006,"timely":0.7746},{"ratio":1.42,"issued":105824,"timely":0.7854},{"ratio":1.46,"issued":106584,"timely":0.8015},{"ratio":1.5,"issued":107158,"timely":0.8234},{"ratio":1.54,"issued":107493,"timely":0.8444},{"ratio":1.58,"issued":107916,"timely":0.8665},{"ratio":1.62,"issued":108543,"timely":0.8832},{"ratio":1.66,"issued":108743,"timely":0.8909},{"ratio":1.7,"issued":109062,"timely":0.9031},{"ratio":1.74,"issued":109402,"timely":0.9084},{"ratio":1.78,"issued":109708,"timely":0.9156},{"ratio":1.82,"issued":109873,"timely":0.9243}],"duration_curve":[{"duration":10.0,"issued":107951,"timely":0.8499,"sd":0.0345,"lo":0.8032,"hi":0.9153},{"duration":10.25,"issued":107951,"timely":0.8447,"sd":0.0344,"lo":0.7985,"hi":0.9101},{"duration":10.5,"issued":107951,"timely":0.8388,"sd":0.0344,"lo":0.793,"hi":0.9042},{"duration":10.75,"issued":107951,"timely":0.8326,"sd":0.034,"lo":0.7872,"hi":0.8976},{"duration":11.0,"issued":107951,"timely":0.8261,"sd":0.034,"lo":0.7809,"hi":0.891},{"duration":11.25,"issued":107951,"timely":0.8193,"sd":0.0339,"lo":0.7746,"hi":0.8843},{"duration":11.5,"issued":107951,"timely":0.8122,"sd":0.0338,"lo":0.7682,"hi":0.8773},{"duration":11.75,"issued":107951,"timely":0.8046,"sd":0.0336,"lo":0.761,"hi":0.8691},{"duration":12.0,"issued":107951,"timely":0.7965,"sd":0.0335,"lo":0.7537,"hi":0.8611},{"duration":12.25,"issued":107951,"timely":0.7883,"sd":0.0332,"lo":0.7461,"hi":0.8524},{"duration":12.5,"issued":107951,"timely":0.7798,"sd":0.0328,"lo":0.7389,"hi":0.8436},{"duration":12.75,"issued":107951,"timely":0.7709,"sd":0.0326,"lo":0.731,"hi":0.8344},{"duration":13.0,"issued":107951,"timely":0.7618,"sd":0.0323,"lo":0.7224,"hi":0.825},{"duration":13.25,"issued":107951,"timely":0.7525,"sd":0.0318,"lo":0.7138,"hi":0.8152},{"duration":13.5,"issued":107951,"timely":0.7429,"sd":0.0316,"lo":0.7051,"hi":0.805},{"duration":13.75,"issued":107951,"timely":0.733,"sd":0.0313,"lo":0.6961,"hi":0.795},{"duration":14.0,"issued":107951,"timely":0.723,"sd":0.031,"lo":0.6866,"hi":0.7843},{"duration":14.25,"issued":107951,"timely":0.7127,"sd":0.0306,"lo":0.677,"hi":0.7735},{"duration":14.5,"issued":107951,"timely":0.7024,"sd":0.0303,"lo":0.6672,"hi":0.7626},{"duration":14.75,"issued":107951,"timely":0.6921,"sd":0.0299,"lo":0.6584,"hi":0.7511},{"duration":15.0,"issued":107951,"timely":0.6816,"sd":0.0297,"lo":0.6486,"hi":0.7404},{"duration":15.25,"issued":107951,"timely":0.6713,"sd":0.0292,"lo":0.6392,"hi":0.7291},{"duration":15.5,"issued":107951,"timely":0.6609,"sd":0.0289,"lo":0.6295,"hi":0.7186},{"duration":15.75,"issued":107951,"timely":0.6506,"sd":0.0285,"lo":0.6194,"hi":0.7073},{"duration":16.0,"issued":107951,"timely":0.64,"sd":0.0282,"lo":0.6095,"hi":0.6959},{"duration":16.25,"issued":107951,"timely":0.6293,"sd":0.0279,"lo":0.5989,"hi":0.6848},{"duration":16.5,"issued":107951,"timely":0.6186,"sd":0.0274,"lo":0.5886,"hi":0.6733},{"duration":16.75,"issued":107951,"timely":0.6078,"sd":0.027,"lo":0.5787,"hi":0.6621},{"duration":17.0,"issued":107951,"timely":0.5972,"sd":0.0264,"lo":0.5687,"hi":0.6505},{"duration":17.25,"issued":107951,"timely":0.5868,"sd":0.0261,"lo":0.5589,"hi":0.6393},{"duration":17.5,"issued":107951,"timely":0.5765,"sd":0.0255,"lo":0.5488,"hi":0.6277},{"duration":17.75,"issued":107951,"timely":0.566,"sd":0.025,"lo":0.5389,"hi":0.6162},{"duration":18.0,"issued":107951,"timely":0.5558,"sd":0.0245,"lo":0.5286,"hi":0.6049},{"duration":18.25,"issued":107951,"timely":0.5456,"sd":0.0242,"lo":0.5191,"hi":0.5938},{"duration":18.5,"issued":107951,"timely":0.5353,"sd":0.0237,"lo":0.5096,"hi":0.5826},{"duration":18.75,"issued":107951,"timely":0.5252,"sd":0.0234,"lo":0.4999,"hi":0.5715},{"duration":19.0,"issued":107951,"timely":0.5152,"sd":0.0229,"lo":0.4905,"hi":0.5601},{"duration":19.25,"issued":107951,"timely":0.5053,"sd":0.0225,"lo":0.4807,"hi":0.5493},{"duration":19.5,"issued":107951,"timely":0.4954,"sd":0.0219,"lo":0.4713,"hi":0.5385},{"duration":19.75,"issued":107951,"timely":0.4859,"sd":0.0214,"lo":0.4625,"hi":0.5276},{"duration":20.0,"issued":107951,"timely":0.4763,"sd":0.0209,"lo":0.4534,"hi":0.5171},{"duration":20.25,"issued":107951,"timely":0.4669,"sd":0.0206,"lo":0.4439,"hi":0.5068},{"duration":20.5,"issued":107951,"timely":0.4577,"sd":0.0203,"lo":0.4351,"hi":0.4971},{"duration":20.75,"issued":107951,"timely":0.4487,"sd":0.02,"lo":0.4263,"hi":0.4876},{"duration":21.0,"issued":107951,"timely":0.4397,"sd":0.0196,"lo":0.4175,"hi":0.4774},{"duration":21.25,"issued":107951,"timely":0.4308,"sd":0.0193,"lo":0.4089,"hi":0.468},{"duration":21.5,"issued":107951,"timely":0.4221,"sd":0.0188,"lo":0.4004,"hi":0.4583},{"duration":21.75,"issued":107951,"timely":0.4135,"sd":0.0183,"lo":0.392,"hi":0.4483},{"duration":22.0,"issued":107951,"timely":0.4052,"sd":0.018,"lo":0.3842,"hi":0.4393},{"duration":22.25,"issued":107951,"timely":0.3967,"sd":0.0177,"lo":0.3759,"hi":0.43},{"duration":22.5,"issued":107951,"timely":0.3884,"sd":0.0173,"lo":0.3678,"hi":0.4209},{"duration":22.75,"issued":107951,"timely":0.3804,"sd":0.017,"lo":0.36,"hi":0.4122},{"duration":23.0,"issued":107951,"timely":0.3725,"sd":0.0167,"lo":0.3523,"hi":0.4038},{"duration":23.25,"issued":107951,"timely":0.3647,"sd":0.0163,"lo":0.3449,"hi":0.3956},{"duration":23.5,"issued":107951,"timely":0.3573,"sd":0.0161,"lo":0.3377,"hi":0.3879},{"duration":23.75,"issued":107951,"timely":0.3497,"sd":0.0157,"lo":0.3306,"hi":0.3793},{"duration":24.0,"issued":107951,"timely":0.3426,"sd":0.0154,"lo":0.3237,"hi":0.3716},{"duration":24.25,"issued":107951,"timely":0.3355,"sd":0.0151,"lo":0.3169,"hi":0.3638},{"duration":24.5,"issued":107951,"timely":0.3285,"sd":0.0147,"lo":0.3105,"hi":0.3562},{"duration":24.75,"issued":107951,"timely":0.3217,"sd":0.0144,"lo":0.3044,"hi":0.3489},{"duration":25.0,"issued":107951,"timely":0.315,"sd":0.0142,"lo":0.2976,"hi":0.3419},{"duration":25.25,"issued":107951,"timely":0.3084,"sd":0.014,"lo":0.2912,"hi":0.3347},{"duration":25.5,"issued":107951,"timely":0.302,"sd":0.0136,"lo":0.2853,"hi":0.3279},{"duration":25.75,"issued":107951,"timely":0.2956,"sd":0.0132,"lo":0.2796,"hi":0.3209},{"duration":26.0,"issued":107951,"timely":0.2896,"sd":0.0129,"lo":0.2737,"hi":0.314}],"best_duration":{"duration":20.5,"issued":107951,"timely":0.4577,"sd":0.0203,"lo":0.4351,"hi":0.4971},"baseline":{"issued":{"mean":107951.8,"sd":1014.9806566301316,"lo":106460.0,"hi":109952.0},"timely":{"mean":0.45770844954175727,"sd":0.020315738235154052,"lo":0.43508988332355975,"hi":0.497098626914066},"exits":{"mean":50080.7,"sd":206.94500074496443,"lo":49795.0,"hi":50533.0},"gate1_gross":0.3237,"threshold":2.08,"duration":20.5,"appeal_n":{"mean":8491.7,"sd":136.87143196770057,"lo":8268.0,"hi":8793.0},"appeal_median_weeks":{"mean":51.43279097538241,"sd":0.47416932055068634,"lo":50.512628324822195,"hi":51.88143500159526},"cap_issued":1.086778393717744,"cap_exited":0.858728750168666},"levers":[{"lever":"Assessment capacity +50%","issued":{"mean":111541.2,"sd":636.8249018023365,"lo":110631.0,"hi":112574.0},"timely":{"mean":0.5232388284354336,"sd":0.007007259045545469,"lo":0.5095452627032969,"hi":0.5331443989362734},"exits":{"mean":50397.1,"sd":213.53295348077359,"lo":49982.0,"hi":50636.0},"change":0.6},{"lever":"Assessment capacity +100%","issued":{"mean":112266.9,"sd":234.6252094061695,"lo":111854.0,"hi":112525.0},"timely":{"mean":0.5349518139431034,"sd":0.0027185999726896675,"lo":0.529577002529104,"hi":0.5384645170033784},"exits":{"mean":50576.8,"sd":260.93668878782756,"lo":50091.0,"hi":51040.0},"change":1.0},{"lever":"Process 20.5 to 16 weeks","issued":{"mean":107951.8,"sd":1014.9806566301316,"lo":106460.0,"hi":109952.0},"timely":{"mean":0.6400299455268528,"sd":0.028176172831106145,"lo":0.6094895714518495,"hi":0.6958748109411916},"exits":{"mean":50080.7,"sd":206.94500074496443,"lo":49795.0,"hi":50533.0},"change":0.0},{"lever":"Appeal resolved in 10 not 30 wk","issued":{"mean":107875.2,"sd":951.6505894730715,"lo":106581.0,"hi":109783.0},"timely":{"mean":0.45501680897677954,"sd":0.019734500690732834,"lo":0.4243786383194128,"hi":0.4920925968370387},"exits":{"mean":50156.0,"sd":209.3911809667892,"lo":49872.0,"hi":50481.0},"change":0.2},{"lever":"Appeal reachable by 40%","issued":{"mean":116239.3,"sd":1681.6476080849334,"lo":114160.0,"hi":118977.0},"timely":{"mean":0.43148467390134526,"sd":0.022142377427042777,"lo":0.3872420535862872,"hi":0.46155229068246056},"exits":{"mean":39219.2,"sd":279.3622896686109,"lo":38701.0,"hi":39628.0},"change":-21.7},{"lever":"Appeal reachable by 70%","issued":{"mean":126657.0,"sd":2437.6536988578905,"lo":123245.0,"hi":130992.0},"timely":{"mean":0.39914536540605955,"sd":0.025313330142472227,"lo":0.34703220883620456,"hi":0.430427527826954},"exits":{"mean":24353.9,"sd":262.2265559905531,"lo":23761.0,"hi":24704.0},"change":-51.4}],"robustness":{"steps":[{"steps_per_year":26,"issued":107421,"timely":0.448},{"steps_per_year":52,"issued":107755,"timely":0.4511},{"steps_per_year":104,"issued":107566,"timely":0.4535},{"steps_per_year":208,"issued":107857,"timely":0.4521}],"horizon":[{"years":2,"issued":107639,"timely":0.4735},{"years":3,"issued":107784,"timely":0.4568},{"years":4,"issued":107755,"timely":0.4511},{"years":6,"issued":108101,"timely":0.4434},{"years":8,"issued":107565,"timely":0.4391}],"stability":{"n_under_capacity":22,"n_la":152,"ratio_median":1.5042841642537006,"ratio_p10":0.8838473228755925,"ratio_p90":2.6211200667824497,"rows":[{"year":1,"total":2557,"under_capacity":2390,"adequate":167},{"year":2,"total":5511,"under_capacity":5319,"adequate":192},{"year":3,"total":8313,"under_capacity":8099,"adequate":214},{"year":4,"total":10683,"under_capacity":10530,"adequate":153},{"year":5,"total":13302,"under_capacity":13080,"adequate":222},{"year":6,"total":16182,"under_capacity":15913,"adequate":269},{"year":7,"total":18451,"under_capacity":18250,"adequate":201},{"year":8,"total":21233,"under_capacity":21038,"adequate":195},{"year":9,"total":24060,"under_capacity":23725,"adequate":335},{"year":10,"total":26926,"under_capacity":26589,"adequate":337}]}}};
+const REAL = SWEEP.actual;
+const C = {s0:'#8892a0',s1:'#6b7d8f',s2:'#4a6b8a',s3:'#c4703d',s4:'#2d4a63',real:'#b33c3c',lost:'#5a2b2b'};
+
+/* ================= Figure 1 - the pathway on a time axis =================
+   Distance along the axis is weeks since the request, so a child's position is
+   how long it has been waiting. Quantity is the information channel: one figure
+   stands for 1,000 children and the number standing in each lane is the number
+   really standing there. Motion speed is a readability setting and nothing else.
+   The rates driving it are the published and derived values in Table 2 and in the
+   transition table under the figure. Nothing here is recomputed. */
+(function(){
+  const svg=document.getElementById('pathway'),
+        cap=document.getElementById('f1cap'),
+        narr=document.getElementById('f1-narrate');
+  if(!svg) return;
+
+  const SERIF='"Times New Roman",Times,Georgia,serif';
+  const SANS='Arial,Helvetica,sans-serif';
+  const A={wait:'#6e93b8',appeal:'#9b7fc4',ontime:'#4fa88e',late:'#d08a4e',out:'#c04a4a',pre:'#7d8896'};
+
+  /* ---- axis ---- */
+  const X0=118, PXW=12.3, WMAX=58, XEND=X0+WMAX*PXW;
+  const w2x=w=>X0+Math.min(w,WMAX)*PXW;
+  const DEADLINE=20;
+
+  /* ---- lanes ---- */
+  const Y={issued:90, main:162, axis:208, appeal:258, out:316};
+  const PRE=[30,60,90];                       /* need exists, noticed, request made */
+
+  /* ---- rates. Published or derived. See the transition table under the figure. ---- */
+  const GROSS=0.324, APPEAL=0.18, SUCCESS=0.99, GATE2=0.06,
+        DUR=20.5, DURSD=9.2, QUEUE=0.6, APPEAL_WK=30;
+  const PER_FIGURE=1000, REQUESTS=162702;
+  const RATE=REQUESTS/PER_FIGURE/52;          /* figures entering per simulated week */
+
+  let rng=mulberry(20260916);
+  function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function gauss(){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+  let week=0, kids=[], nextId=1, focus=null, wantFocus=true,
+      playing=true, speed=1, acc=0, tally=null, epoch=0;
+  const nodes=new Map();
+
+  /* Volumes are counted over a rolling year, so they settle at England's own annual
+     totals and can be read against them. The timeliness share is cumulative, because a
+     single year of completions is too few to hold a stable percentage. */
+  function blankTally(){return {issuedYr:[],leftYr:[],timely:0,base:0,appealing:0,waiting:0};}
+
+  function makeKid(spawn){
+    const k={id:nextId++,focus:false};
+    k.spawn=spawn;
+    k.requested=spawn+6;                       /* three pre-count stops, two weeks each */
+    k.yo=(rng()-0.5)*22; k.pyo=(rng()-0.5)*74; k.pxo=(rng()-0.5)*16;
+    k.oxo=(rng()-0.5)*30; k.oyo=(rng()-0.5)*40;   /* the out lane piles up at one week, so spread it */
+    k.dur=Math.max(3,DUR+gauss()*DURSD)+(-QUEUE*Math.log(Math.max(1e-9,rng())));
+    if(rng()<GROSS){
+      if(rng()<APPEAL*SUCCESS){
+        k.route='appeal';
+        k.backAt=1+APPEAL_WK;                  /* local weeks: refused at 1, back at 31 */
+        k.issueAt=k.backAt+k.dur;
+      } else {
+        k.route='out'; k.leaveAt=1.6; k.why='refused an assessment';
+      }
+    } else if(rng()<GATE2){
+      k.route='out'; k.leaveAt=k.dur; k.why='assessed, and no plan issued';
+    } else {
+      k.route='plan'; k.issueAt=k.dur;
+    }
+    if(k.route==='appeal'&&rng()<GATE2){
+      k.route='out'; k.leaveAt=k.backAt+k.dur; k.why='assessed after appeal, and no plan issued';
+      delete k.issueAt;
+    }
+    if(k.issueAt!==undefined){k.timely=k.issueAt<=DEADLINE;}
+    const last=k.issueAt!==undefined?k.issueAt:k.leaveAt;
+    k.end=k.requested+last+14;                 /* linger, then leave the frame */
+    return k;
+  }
+
+  /* Where a child is, and what it is doing, at global week w. */
+  function stateOf(k,w){
+    const L=w-k.requested;
+    if(L<0){
+      const i=Math.min(2,Math.floor((w-k.spawn)/2));
+      return {x:PRE[i]+k.pxo,y:Y.main+k.pyo,c:A.pre,phase:'pre',stop:i,L};
+    }
+    if(k.route==='out'&&L>=k.leaveAt)
+      return {x:w2x(k.leaveAt)+k.oxo,y:Y.out+k.oyo,c:A.out,phase:'out',L,flat:1};
+    if(k.issueAt!==undefined&&L>=k.issueAt)
+      return {x:w2x(k.issueAt),y:Y.issued,c:k.timely?A.ontime:A.late,phase:'issued',L};
+    if(k.route==='appeal'&&L>=1&&L<k.backAt)
+      return {x:w2x(L),y:Y.appeal,c:A.appeal,phase:'appeal',L};
+    return {x:w2x(L),y:Y.main,c:L>DEADLINE?A.late:A.wait,phase:'wait',L};
+  }
+
+  const plural=n=>n+(n===1?' week':' weeks');
+
+  function words(k,w){
+    const s=stateOf(k,w), L=Math.round(s.L);
+    if(s.phase==='pre')
+      return ['a need exists, and England records nothing',
+              'somebody notices, and England records nothing',
+              'a request for an assessment is made, and the count begins'][s.stop];
+    if(s.phase==='out') return 'left the pathway in week '+Math.round(k.leaveAt)+', '+k.why;
+    if(s.phase==='issued')
+      return 'plan issued in week '+Math.round(k.issueAt)+', '+
+        (k.timely?'inside the twenty-week deadline'
+                 :plural(Math.round(k.issueAt-DEADLINE))+' past the deadline')+
+        (k.route==='appeal'?', and in no timeliness statistic England publishes':'');
+    if(s.phase==='appeal')
+      return 'refused, and appealing. Week '+Math.min(APPEAL_WK,Math.max(1,L-1))+' of roughly thirty';
+    return L>DEADLINE
+      ? 'still waiting in week '+L+', '+plural(L-DEADLINE)+' past the deadline'
+      : 'waiting for an assessment, week '+L+' of twenty';
+  }
+
+  /* ---------- static layer ---------- */
+  function backdrop(){
+    let g='';
+    /* pre-count zone */
+    g+=`<rect x="12" y="${Y.main-48}" width="96" height="96" rx="4" fill="#0c0c0c" stroke="#232323"/>`;
+    g+=`<text x="60" y="${Y.main-56}" text-anchor="middle" font-size="9" fill="#6a6a6a" font-family="${SANS}" letter-spacing="0.07em">NOT COUNTED</text>`;
+    PRE.forEach((x,i)=>{
+      g+=`<text x="${x}" y="${Y.main+62}" text-anchor="middle" font-size="8.5" fill="#5e5e5e" font-family='${SERIF}'>${['need','noticed','request'][i]}</text>`;
+    });
+    /* lanes, labelled above their own left end */
+    const lane=(y,label,colour,dy,right)=>{
+      g+=`<line x1="${X0}" y1="${y}" x2="${XEND}" y2="${y}" stroke="#1e1e1e" stroke-width="1"/>`;
+      g+=`<text x="${right?XEND:X0}" y="${y+dy}" text-anchor="${right?'end':'start'}" font-size="10.5"`+
+         ` fill="${colour}" font-family='${SERIF}'>${label}</text>`;
+    };
+    lane(Y.issued,'Plan issued, placed at the week it was issued','#8f9aa6',-34,false);
+    lane(Y.main,'Waiting for an assessment','#8f9aa6',-46,false);
+    lane(Y.appeal,'Appealing a refusal','#9b7fc4',24,true);
+    lane(Y.out,'Left without a plan','#b06a6a',26,true);
+    /* time axis */
+    g+=`<line x1="${X0}" y1="${Y.axis}" x2="${XEND}" y2="${Y.axis}" stroke="#3a3a3a" stroke-width="1"/>`;
+    for(let w=0;w<=WMAX;w+=4){
+      const x=w2x(w);
+      g+=`<line x1="${x}" y1="${Y.axis}" x2="${x}" y2="${Y.axis+5}" stroke="#3a3a3a"/>`;
+      g+=`<text x="${x}" y="${Y.axis+17}" text-anchor="middle" font-size="9" fill="#666" font-family="${SANS}">${w}</text>`;
+    }
+    g+=`<text x="${XEND}" y="${Y.axis+31}" text-anchor="end" font-size="10.5" fill="#8f9aa6" font-family='${SERIF}'>Weeks since the request for an assessment</text>`;
+    /* the deadline */
+    const dx=w2x(DEADLINE);
+    g+=`<line x1="${dx}" y1="${Y.issued-42}" x2="${dx}" y2="${Y.out+26}" stroke="#d08a4e" stroke-width="1.3" stroke-dasharray="5 4" opacity="0.85"/>`;
+    g+=`<text x="${dx+7}" y="${Y.issued-46}" font-size="11" fill="#d08a4e" font-family='${SERIF}'>Twenty-week statutory deadline</text>`;
+    /* scale note, the Pathfinder move */
+    g+=`<text x="${XEND}" y="22" text-anchor="end" font-size="10" fill="#6a6a6a" font-family="${SANS}" letter-spacing="0.05em">ONE FIGURE = 1,000 CHILDREN</text>`;
+    g+=`<text x="10" y="22" font-size="11" fill="#7b828c" font-family='${SERIF}'>The number standing in each lane is the number really standing there.</text>`;
+    return g;
+  }
+
+  svg.innerHTML=`<g>${backdrop()}</g><g id="f1-trail"></g><g id="f1-actors"></g><g id="f1-hud"></g>`;
+  const trailG=svg.querySelector('#f1-trail'),
+        actors=svg.querySelector('#f1-actors'),
+        hud=svg.querySelector('#f1-hud');
+
+  /* ---------- simulation ---------- */
+  function simulate(dt){
+    week+=dt;
+    acc+=RATE*dt;
+    while(acc>=1){acc-=1;kids.push(makeKid(week-rng()*dt));}
+    for(const k of kids){
+      const L=week-k.requested;
+      if(!k.cIn&&L>=0){k.cIn=1;}
+      if(!k.cOut){
+        if(k.issueAt!==undefined&&L>=k.issueAt){
+          k.cOut=1;tally.issuedYr.push(week);
+          if(k.route!=='appeal'){tally.base++;if(k.timely)tally.timely++;}
+        } else if(k.route==='out'&&L>=k.leaveAt){k.cOut=1;tally.leftYr.push(week);}
+      }
+    }
+    kids=kids.filter(k=>{
+      if(week<k.end) return true;
+      const n=nodes.get(k.id); if(n){n.remove();nodes.delete(k.id);}
+      if(k===focus){focus=null;wantFocus=true;}
+      return false;
+    });
+    if(wantFocus){
+      const c=kids.find(k=>week-k.spawn<1.2&&week<k.requested);
+      if(c){c.focus=true;focus=c;wantFocus=false;}
+    }
+    while(tally.issuedYr.length&&tally.issuedYr[0]<week-52)tally.issuedYr.shift();
+    while(tally.leftYr.length&&tally.leftYr[0]<week-52)tally.leftYr.shift();
+    tally.appealing=0;tally.waiting=0;
+    for(const k of kids){
+      const p=stateOf(k,week);
+      if(p.phase==='appeal')tally.appealing++;
+      if(p.phase==='wait')tally.waiting++;
+    }
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    let trail='';
+    for(const k of kids){
+      const p=stateOf(k,week);
+      let n=nodes.get(k.id);
+      if(!n){
+        n=document.createElementNS('http://www.w3.org/2000/svg','g');
+        n.innerHTML='<use href="#kid"/>';
+        actors.appendChild(n);nodes.set(k.id,n);
+      }
+      const sc=k.focus?1.5:1.0;
+      const off=(p.phase==='pre'||p.flat)?0:k.yo;
+      n.setAttribute('transform',`translate(${p.x-5*sc},${p.y-13*sc+off}) scale(${sc})`);
+      const u=n.firstChild;
+      u.setAttribute('fill',p.c);
+      u.setAttribute('opacity',k.focus?1:(p.phase==='out'?0.45:0.6));
+      if(k.focus&&!n.dataset.tag){
+        n.dataset.tag='1';
+        n.insertAdjacentHTML('beforeend',
+          `<circle cx="5" cy="8" r="11.5" fill="none" stroke="#fff" stroke-width="0.8" opacity="0.85"/>`+
+          `<text x="5" y="-9" text-anchor="middle" font-size="7.5" fill="#fff" font-family='${SERIF}'>Child ${String(k.id).padStart(3,'0')}</text>`);
+      }
+      /* the focus child drags its whole history behind it */
+      if(k.focus&&p.phase!=='pre'&&p.L>0){
+        const y=p.y+((p.flat)?0:k.yo);
+        trail+=`<line x1="${w2x(0)}" y1="${y}" x2="${p.x}" y2="${y}" stroke="${p.c}" stroke-width="1" opacity="0.4"/>`;
+        if(p.phase==='appeal'||p.phase==='issued'||p.phase==='out')
+          trail+=`<line x1="${w2x(0)}" y1="${Y.main+k.yo}" x2="${w2x(Math.min(p.L,1.6))}" y2="${Y.main+k.yo}" stroke="${A.wait}" stroke-width="1" opacity="0.3"/>`;
+      }
+    }
+    trailG.innerHTML=trail;
+
+    const pct=tally.base?Math.round(100*tally.timely/tally.base)+'%':'0%';
+    const K=n=>(n*PER_FIGURE).toLocaleString('en-GB');
+    const cells=[['Week',Math.floor(week-epoch)],['Figures on Screen',kids.length],
+                 ['Waiting Now',K(tally.waiting)],['Appealing Now',K(tally.appealing)],
+                 ['Left, Past Year',K(tally.leftYr.length)],
+                 ['Plans Issued, Past Year',K(tally.issuedYr.length)],
+                 ['Within 20 Weeks',pct]];
+    let g='',x=10;
+    cells.forEach(([l,v])=>{
+      g+=`<text x="${x}" y="${Y.out+50}" font-size="15" fill="#e8eaed" font-family="${SANS}">${v}</text>`;
+      g+=`<text x="${x}" y="${Y.out+66}" font-size="7.8" fill="#79808a" font-family="${SANS}" letter-spacing="0.04em">${l.toUpperCase()}</text>`;
+      x+=123;
+    });
+    hud.innerHTML=g;
+
+    if(focus) narr.innerHTML=`<b>Child ${String(focus.id).padStart(3,'0')}</b>: ${words(focus,week)}.`;
+  }
+
+  /* ---------- loop ---------- */
+  let last=0;
+  function frame(ts){
+    if(!playing) return;
+    const dt=Math.min(0.2,(ts-last)/1000)*speed;   /* one simulated week per second at 1x */
+    last=ts;
+    simulate(dt);render();
+    requestAnimationFrame(frame);
+  }
+
+  function reset(warm){
+    kids.forEach(k=>{const n=nodes.get(k.id);if(n)n.remove();});
+    nodes.clear();kids=[];week=0;nextId=1;focus=null;wantFocus=true;acc=0;
+    tally=blankTally();
+    rng=mulberry(20260916+Math.floor(Math.random()*9999));
+    /* Run the system to equilibrium before anyone looks at it. Counting from a cold
+       start censors long waits, since a child needing forty weeks cannot finish inside a
+       short run, which pushes the reported timeliness up by about eight points. The
+       counters therefore start after the warm-up, not before it. */
+    if(warm){for(let i=0;i<1500;i++)simulate(0.2);}
+    epoch=week;
+    if(focus){focus.focus=false;const n=nodes.get(focus.id);if(n){n.dataset.tag='';n.querySelectorAll('circle,text').forEach(e=>e.remove());}}
+    focus=null;wantFocus=true;
+    render();
+  }
+
+  const play=document.getElementById('f1-play'),
+        spd=document.getElementById('f1-speed');
+  play.onclick=()=>{playing=!playing;play.textContent=playing?'Pause':'Play';
+    if(playing){last=performance.now();requestAnimationFrame(frame);}};
+  spd.onclick=()=>{speed=speed===1?2:speed===2?4:1;spd.textContent='Speed '+speed+'×';};
+  document.getElementById('f1-follow').onclick=()=>{
+    if(focus){const n=nodes.get(focus.id);
+      if(n){n.dataset.tag='';n.querySelectorAll('circle,text').forEach(e=>e.remove());}
+      focus.focus=false;}
+    focus=null;wantFocus=true;};
+  document.getElementById('f1-reset').onclick=()=>{reset(true);};
+
+  cap.textContent='Every child enters at the left, passes three stages England does not count, '+
+    'and joins the axis at the moment a request is made. Distance along the axis is weeks waited, '+
+    'so a child’s position is its own delay. Children refused at the first gate either drop to '+
+    'the appeal lane and rejoin the queue around thirty weeks later, or leave the pathway, where '+
+    'England records nothing further about them. Plans rise to the top lane at the week they are '+
+    'issued, which is why the split at the dashed line can be read directly. One figure stands for '+
+    'a thousand children and the number in each lane is the real stock, so the crowding is the '+
+    'measurement. Speed is a readability setting and carries no information. Rates are the values '+
+    'in the transition table below. The two past-year counters settle close to England\u2019s own annual '+
+    'totals, 110,708 plans issued and 50,500 children leaving without one, which is a check a reader can '+
+    'watch rather than take on trust. Every figure quoted on this page comes from the model run in '+
+    'Python, not from this animation.';
+
+  reset(true);
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    playing=false;play.textContent='Play';
+  } else {
+    last=performance.now();requestAnimationFrame(frame);
+  }
+})();
+
+/* ================= Figure 2 ================= */
+(function(){
+  const svg=document.getElementById('chart'), slider=document.getElementById('dial');
+  const W=900,H=430,M={t:28,r:36,b:60,l:74};
+  const xmin=60000,xmax=125000;
+  const px=v=>M.l+(v-xmin)/(xmax-xmin)*(W-M.l-M.r);
+  const py=v=>H-M.b-v*(H-M.t-M.b);
+  const ex=px(REAL.issued), ey=py(REAL.timely);
+  const fmt=n=>n.toLocaleString('en-GB');
+  const ACCOUNTS={
+    a:{rows:SWEEP.queue_curve,key:'ratio',colour:'#4a6b8a',
+       label:'Assessment Capacity, Relative to Demand',fmt:v=>v.toFixed(2)+'×',rdLabel:'Capacity Setting',
+       cap:"Each point is the mean of five seeds at one capacity setting. The red cross is England's actual position. The curve is everything the resourcing account can produce, and it passes nowhere near the cross at any capacity setting."},
+    b:{rows:SWEEP.duration_curve,key:'duration',colour:'#3f8f7a',
+       label:'Statutory Process Duration, in Weeks',fmt:v=>v.toFixed(1)+' wks',rdLabel:'Process Duration',
+       cap:"The same model with capacity held adequate, varying only how long the statutory process takes. The line is vertical: duration changes when plans are issued, not how many. It reaches England's timeliness at 20.5 weeks and sits 2.5% below England on volume, a residual explained in Section Seven."}
+  };
+  let cur='a';
+  function render(){
+    const A=ACCOUNTS[cur],rows=A.rows;let g='';
+    for(let v=60000;v<=125000;v+=10000){
+      g+=`<line x1="${px(v)}" y1="${M.t}" x2="${px(v)}" y2="${H-M.b}" stroke="#1c1c1c"/>`;
+      g+=`<text x="${px(v)}" y="${H-M.b+20}" text-anchor="middle" fill="#5c6672" font-family="Times New Roman,Times,serif" font-size="11">${v/1000}k</text>`;}
+    for(let v=0;v<=1.0001;v+=0.25){
+      g+=`<line x1="${M.l}" y1="${py(v)}" x2="${W-M.r}" y2="${py(v)}" stroke="#1c1c1c"/>`;
+      g+=`<text x="${M.l-12}" y="${py(v)+4}" text-anchor="end" fill="#5c6672" font-family="Times New Roman,Times,serif" font-size="11">${Math.round(v*100)}%</text>`;}
+    g+=`<text x="${(M.l+W-M.r)/2}" y="${H-16}" text-anchor="middle" fill="#97a1ad" font-family="Times New Roman,Times,serif" font-size="12">Plans Issued per Year</text>`;
+    g+=`<text transform="translate(20,${(M.t+H-M.b)/2}) rotate(-90)" text-anchor="middle" fill="#97a1ad" font-family="Times New Roman,Times,serif" font-size="12">Issued Within 20 Weeks</text>`;
+    g+=`<polyline points="${rows.map(r=>`${px(r.issued)},${py(r.timely)}`).join(' ')}" fill="none" stroke="${A.colour}" stroke-width="2" opacity=".6"/>`;
+    rows.forEach(r=>{g+=`<circle cx="${px(r.issued)}" cy="${py(r.timely)}" r="2.6" fill="${A.colour}" opacity=".5"/>`;});
+    g+=`<line x1="${ex-9}" y1="${ey-9}" x2="${ex+9}" y2="${ey+9}" stroke="${C.real}" stroke-width="3"/>`;
+    g+=`<line x1="${ex-9}" y1="${ey+9}" x2="${ex+9}" y2="${ey-9}" stroke="${C.real}" stroke-width="3"/>`;
+    g+=`<text x="${ex+16}" y="${ey-16}" fill="#e06b6b" font-family="Times New Roman,Times,serif" font-size="12" font-weight="600">England, Actual</text>`;
+    g+=`<text x="${ex+16}" y="${ey-1}" fill="#97a1ad" font-family="Times New Roman,Times,serif" font-size="10.5">110,708 plans</text>`;
+    g+=`<text x="${ex+16}" y="${ey+13}" fill="#97a1ad" font-family="Times New Roman,Times,serif" font-size="10.5">46.1% on time</text>`;
+    if(cur==='a')g+=`<text x="${ex}" y="${py(.14)}" text-anchor="middle" fill="#6d7885" font-family="Times New Roman,Times,serif" font-size="11" font-style="italic">The resourcing account never arrives here</text>`;
+    if(cur==='b'){const cx=px(107952);
+      g+=`<text x="${cx-14}" y="${py(.14)}" text-anchor="end" fill="#6d7885" font-family="Times New Roman,Times,serif" font-size="11" font-style="italic">Duration cannot move volume</text>`;
+      g+=`<text x="${cx-14}" y="${py(.14)+15}" text-anchor="end" fill="#6d7885" font-family="Times New Roman,Times,serif" font-size="11" font-style="italic">so the line is vertical</text>`;}
+    g+=`<line id="gapline" stroke="${A.colour}" stroke-width="1.4" stroke-dasharray="4 4" opacity=".85"/>`;
+    g+=`<circle id="marker" r="7.5" fill="${A.colour}" stroke="#000000" stroke-width="2"/>`;
+    svg.innerHTML=g;
+    slider.max=rows.length-1;
+    let home=Math.floor(rows.length/2);
+    if(cur==='b'){const i=rows.findIndex(r=>Math.abs(r.duration-20.5)<1e-6); if(i>=0)home=i;}
+    slider.value=home;
+    document.getElementById('slider-label').textContent=A.label;
+    document.getElementById('r-param-l').textContent=A.rdLabel;
+    document.getElementById('cap2').textContent=A.cap;
+    draw(+slider.value);
+  }
+  function draw(i){
+    const A=ACCOUNTS[cur],r=A.rows[i];if(!r)return;
+    const x=px(r.issued),y=py(r.timely);
+    const m=svg.querySelector('#marker'),gl=svg.querySelector('#gapline');
+    m.setAttribute('cx',x);m.setAttribute('cy',y);
+    gl.setAttribute('x1',x);gl.setAttribute('y1',y);gl.setAttribute('x2',ex);gl.setAttribute('y2',ey);
+    document.getElementById('r-param').textContent=A.fmt(r[A.key]);
+    document.getElementById('r-issued').textContent=fmt(r.issued);
+    document.getElementById('r-timely').textContent=(r.timely*100).toFixed(1)+'%';
+    const dv=Math.round(100*(r.issued/REAL.issued-1)),dt=Math.round(100*(r.timely-REAL.timely));
+    const el=document.getElementById('r-gap');
+    el.textContent=`${dv>0?'+':''}${dv}% vol, ${dt>0?'+':''}${dt} pts`;
+    el.parentElement.classList.toggle('hit',Math.abs(dv)<=4&&Math.abs(dt)<=4);
+  }
+  slider.addEventListener('input',e=>draw(+e.target.value));
+  function switchTo(k){cur=k;
+    document.getElementById('tab-a').setAttribute('aria-selected',k==='a');
+    document.getElementById('tab-b').setAttribute('aria-selected',k==='b');render();}
+  document.getElementById('tab-a').addEventListener('click',()=>switchTo('a'));
+  document.getElementById('tab-b').addEventListener('click',()=>switchTo('b'));
+  render();
+})();
+</script>
+</body>
+</html>
