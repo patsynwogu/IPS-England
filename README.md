@@ -9,13 +9,12 @@ capacity. They cannot.
 **Archived dataset:** https://doi.org/10.7910/DVN/NAFBST (Harvard Dataverse)
 **Live page:** https://ips-england.netlify.app
 
-`public/index.html` is self-contained with no build step. Deploy the repo to Netlify with
-`publish = "public"` and it serves as is.
+`index.html` is self-contained with no build step. Deploy the repo to Netlify and it serves as is.
 
 ## What the model is
 
-152 local authority agents and individual child agents moving through five stages, from an
-unmet need to an Education, Health and Care plan. Families hold a navigational capacity and
+152 local authority agents and individual child agents moving through the statutory route,
+from a request for assessment to an Education, Health and Care plan. Families hold a navigational capacity and
 decide whether to appeal when refused. Authorities screen requests, assess at their own
 capacity with no central coordinator, and see successful appeals return to their queue. Weekly
 time step, four-year horizon, final year reported, every published figure is the mean of ten random
@@ -90,11 +89,15 @@ published 50,500. Applying the two published gate rates to the published request
 roughly 50,400 before any simulation runs, so these are the inputs restated, not independent
 corroboration. The page says so.
 
+## Documentation
+
+A full model description following the ODD protocol (Grimm et al. 2020) is in [`docs/ODD.md`](docs/ODD.md).
+
 ## Reproducing the numbers
 
 ```
 pip install numpy
-python3 model/model.py     # writes model/sweep.json, about 8 minutes
+python3 model.py     # writes sweep.json, about 5 to 8 minutes
 ```
 
 Python is authoritative. The web page displays the contents of `sweep.json` and recomputes
@@ -126,8 +129,6 @@ across all settings.
 - Authority-level caseload and capacity dispersion are lognormal assumptions pending the DfE
   per-authority release. No claim about variation between individual authorities should be drawn
   from this version. Given check 2 above, that release is the first thing this model needs.
-- The recognition stage is calibrated to the national trend and its absolute level is an
-  assumption.
 - The model addresses access and delay, not outcome.
 
 ## How to cite
