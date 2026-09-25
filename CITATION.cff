@@ -1,0 +1,23 @@
+   cff-version: 1.2.0
+   message: "If you use this model, please cite it as below."
+   title: "IPS-England: An Agent-Based Model of the Special Educational Needs Identification and Assessment Pathway in England"
+   type: software
+   authors:
+     - family-names: Nwogu
+       given-names: Patsy
+       orcid: "https://orcid.org/0009-0005-2524-4559"
+   version: 1.5.0
+   date-released: 2026-09-25
+   license: MIT
+   repository-code: "https://github.com/patsynwogu/IPS-England"
+   url: "https://ips-england.netlify.app/"
+   identifiers:
+     - type: doi
+       value: 10.7910/DVN/NAFBST
+       description: "Archived model, data and outputs on Harvard Dataverse"
+   keywords:
+     - agent-based model
+     - special educational needs
+     - SEND
+     - EHC plan
+     - education policy
